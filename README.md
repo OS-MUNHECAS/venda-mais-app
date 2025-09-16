@@ -80,5 +80,5 @@ $ npm run android # ou npm run ios
 | Nome | Papel no Projeto | GitHub |
 | :--- | :--- | :--- |
 | `Diogo Henrique da Silva` | Líder do Projeto / Desenvolvedor | [@Diogohs630](https://github.com/Diogohs630 ) |
-| `Andre` | Desenvolvedor | [@andreflabr](https://github.com/andreflabr ) |
+| `Andre Luiz da Silva` | Desenvolvedor | [@andreflabr](https://github.com/andreflabr ) |
 | `Leonardo Rodrigues Gabriel` | Desenvolvedor | [@leorgabriel](https://github.com/leorgabriel ) |
