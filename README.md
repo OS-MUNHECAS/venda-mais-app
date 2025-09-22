@@ -1,79 +1,59 @@
 # Venda+ Mobile
 
-![GitHub repo size](https://img.shields.io/github/repo-size/seu-usuario/venda-plus?style=for-the-badge )
-![GitHub language count](https://img.shields.io/github/languages/count/seu-usuario/venda-plus?style=for-the-badge )
-![GitHub top language](https://img.shields.io/github/languages/top/seu-usuario/venda-plus?style=for-the-badge )
-![GitHub last commit](https://img.shields.io/github/last-commit/seu-usuario/venda-plus?style=for-the-badge )
+![GitHub language count](https://img.shields.io/github/languages/count/SEU-USUARIO/SEU-REPOSITORIO?style=for-the-badge)
+![GitHub top language](https://img.shields.io/github/languages/top/SEU-USUARIO/SEU-REPOSITORIO?style=for-the-badge)
+![GitHub last commit](https://img.shields.io/github/last-commit/SEU-USUARIO/SEU-REPOSITORIO?style=for-the-badge)
 
-## Introdução e Objetivos
+O **Venda+** (Venda Plus) é um aplicativo mobile para gestão de vendas, desenvolvido como projeto da disciplina de Tópicos Especiais II. Ele foi projetado para ser uma ferramenta simples e eficiente para autônomos e pequenas empresas.
 
-O **Venda+** é um aplicativo mobile de gestão de vendas, desenvolvido como projeto da disciplina de Tópicos Especiais II.
+## 1. Objetivo e Público-Alvo
 
-O objetivo principal é criar uma ferramenta simples e eficiente para atender às necessidades de **pequenas empresas, vendedores autônomos e profissionais liberais**. O aplicativo será intuitivo e fácil de usar, permitindo o gerenciamento de vendas, produtos, clientes e relatórios de forma rápida e organizada, diretamente do celular.
+O objetivo é capacitar o microempreendedor a gerenciar suas vendas, produtos e clientes de forma organizada diretamente do celular, substituindo planilhas complexas ou sistemas caros.
 
-## Público-Alvo
+*   **Público-Alvo:** Pequenas empresas, vendedores autônomos e demais.
 
-*   Pequenas empresas
-*   Vendedores autônomos
-*   Profissionais liberais
+## 2. Funcionalidades Planejadas
 
-## ✨ Funcionalidades Essenciais
+O escopo do projeto está focado nas seguintes funcionalidades essenciais:
 
-O projeto se concentra em entregar um MVP (Produto Mínimo Viável) robusto com as seguintes funcionalidades:
+-   **Gestão de Clientes e Produtos (CRUD):** Cadastro, consulta, edição e remoção.
+-   **Registro de Vendas:** Lançamento de vendas associando clientes e produtos.
+-   **Persistência Local:** Os dados são salvos no dispositivo para acesso rápido e offline.
+-   **Recursos Nativos:** Uso de câmera, biometria (*Estamos avaliando) e compartilhamento para melhorar a experiência.
+-   **Integração com API:** Consulta de CEP para preenchimento automático de endereço.
 
--   **CRUD de Clientes:** Cadastro, consulta, edição e remoção de clientes.
--   **CRUD de Produtos:** Gerenciamento de produtos, incluindo nome, descrição e preço.
--   **Navegação Intuitiva:** Telas claras e fluxo de navegação lógico entre as funcionalidades.
--   **Persistência Local:** Uso de armazenamento no dispositivo para uma experiência de uso mais rápida e responsiva.
--   **Integração com API Externa:** Consulta automática de endereços via CEP para agilizar o cadastro de clientes.
--   **Recursos Nativos:** Utilização de funcionalidades do dispositivo para melhorar a experiência do usuário (ex: câmera, biometria).
--   **Validação de Formulários:** Garantia de que os dados inseridos sejam consistentes e válidos.
--   **Feedback Visual:** Componentes de loading, mensagens de sucesso e erro para manter o usuário informado.
+## 3. Tecnologias e Arquitetura
 
-## 🛠️ Tecnologias e Arquitetura
+A arquitetura foi planejada para ser moderna e eficiente, utilizando tecnologias alinhadas às boas práticas de mercado.
 
-A arquitetura do projeto é baseada em uma abordagem Cliente-Servidor, priorizando tecnologias ágeis e eficientes.
+| Componente          | Tecnologia Escolhida      | Justificativa da Escolha                                                                    |
+| :------------------ | :------------------------ | :------------------------------------------------------------------------------------------ |
+| **Framework**       | React Native com Expo     | Desenvolvimento multiplataforma (Android/iOS) com um único código e ambiente simplificado.    |
+| **Navegação**       | Expo Router               | Estrutura de rotas baseada em arquivos, tornando a navegação mais intuitiva e organizada.   |
+| **Persistência Local**| SQLite (via `expo-sqlite`)| Banco de dados relacional simples para garantir a integridade dos dados e o acesso offline. |
 
-| Camada | Tecnologia | Justificativa |
-| :--- | :--- | :--- |
-| **Frontend (Mobile)** | `React Native` | Framework para desenvolvimento de apps nativos para Android e iOS com um único código-base. |
-| **Backend (API)** | `Python` + `Flask` | Uma stack leve e poderosa para a construção de APIs REST, ideal para um desenvolvimento rápido e eficiente. |
-| **Banco de Dados** | `PostgreSQL` | Banco de dados relacional robusto e confiável para garantir a integridade dos dados. |
-| **Persistência Local** | `SQLite` | Armazenamento de dados no dispositivo para performance, acesso offline e cumprimento dos requisitos. |
-| **API Externa** | `ViaCEP` | Utilizada para automatizar o preenchimento de endereços a partir do CEP. |
+## 4. Como Executar o Projeto
 
-## 🚀 Como Executar o Projeto
+O projeto está em sua fase inicial de desenvolvimento. As instruções abaixo são para configurar o ambiente. O aplicativo em si ainda não possui funcionalidades implementadas.
 
-### Pré-requisitos
+**1. Pré-requisitos**
 
--   [Node.js (LTS)](https://nodejs.org/en/ )
--   [NPM](https://www.npmjs.com/get-npm ) (já vem com o Node.js)
--   [Python 3.10+](https://www.python.org/downloads/ )
--   [Docker](https://www.docker.com/get-started/ ) (Recomendado para rodar o PostgreSQL)
--   Ambiente de desenvolvimento mobile configurado ([Android Studio](https://developer.android.com/studio ) / [Xcode](https://developer.apple.com/xcode/ )).
+*   [Node.js (versão LTS)](https://nodejs.org/en/)
+*   [Git](https://git-scm.com/)
 
-### Instalação e Execução
+**2. Configuração Inicial**
 
 ```bash
 # 1. Clone o repositório
-$ git clone https://github.com/seu-usuario/venda-plus.git
-$ cd venda-plus
+git clone https://github.com/SEU-USUARIO/SEU-REPOSITORIO.git
 
-# 2. Inicie o banco de dados com Docker
-$ cd backend
-$ docker-compose up -d # Este comando irá iniciar um container com o PostgreSQL
+# 2. Entre na pasta do projeto
+cd SEU-REPOSITORIO
 
-# 3. Configure e execute a API Flask
-$ python3 -m venv venv
-$ source venv/bin/activate
-$ pip install -r requirements.txt
-$ flask run
-
-# 4. Em um novo terminal, instale e execute o app mobile
-$ cd ../frontend
-$ npm install
-$ npm run android # ou npm run ios
+# 3. Instale as dependências (serão adicionadas em breve)
+# npm install
 ```
+*(As dependências do projeto serão adicionadas nos próximos commits.)*
 
 ## 🤝 Equipe do Projeto
 
