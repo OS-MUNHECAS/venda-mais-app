@@ -30,12 +30,21 @@ export default function TabsLayout() {
           ),
         }}
       />
-      {/* <Tabs.Screen
+      <Tabs.Screen
         name="clientes"
         options={{
           title: 'Clientes',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="people-outline" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="pedidos"
+        options={{
+          title: 'Fazer Pedido',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="add-circle-outline" size={size} color={color} />
           ),
         }}
       />
@@ -49,14 +58,14 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="pedidos"
+        name="historico"
         options={{
-          title: 'Fazer Pedido',
+          title: 'Histórico',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="add-circle-outline" size={size} color={color} />
+            <Ionicons name="time-outline" size={size} color={color} />
           ),
         }}
-      /> */}
+      />
     </Tabs>
   );
 }
