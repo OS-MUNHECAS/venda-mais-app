@@ -7,11 +7,12 @@ import {
   TouchableOpacity,
   TextInput,
   SafeAreaView,
-  StatusBar
+  StatusBar,
+  useWindowDimensions
 } from 'react-native';
 import { Customer, Contact, FilterType } from './types/customer';
 
-// simulando dados vindos do backend
+// simulando dados
 const mockCustomers: Customer[] = [
   {
     id_customer: 1,
@@ -68,6 +69,9 @@ export default function ClientesScreen() {
   const [searchText, setSearchText] = useState<string>('');
   const [filterActive, setFilterActive] = useState<FilterType>('all');
 
+  const { width } = useWindowDimensions();
+  const isTablet = width >= 768;
+
   // Função para filtrar clientes
   useEffect(() => {
     let filtered = customers;
@@ -108,7 +112,8 @@ export default function ClientesScreen() {
     <TouchableOpacity
       style={[
         styles.customerCard,
-        !item.active && styles.inactiveCard
+        !item.active && styles.inactiveCard,
+        isTablet && styles.tabletCard
       ]}
       onPress={() => console.log('Cliente selecionado:', item.id_customer)}
     >
@@ -195,6 +200,8 @@ export default function ClientesScreen() {
         renderItem={({ item }) => <CustomerCard item={item} />}
         contentContainerStyle={styles.listContainer}
         showsVerticalScrollIndicator={false}
+        numColumns={isTablet ? 2 : 1}
+        key={isTablet ? 'tablet' : 'phone'} // ajuste responsividade
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyText}>Nenhum cliente encontrado</Text>
@@ -278,6 +285,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     overflow: 'hidden',
+  },
+  tabletCard: {
+    flex: 1,
+    marginHorizontal: 6,
   },
   inactiveCard: {
     opacity: 0.7,
