@@ -1,64 +1,138 @@
-# Venda+ Mobile
+# Venda Mais App
 
-![GitHub language count](https://img.shields.io/github/languages/count/SEU-USUARIO/SEU-REPOSITORIO?style=for-the-badge)
-![GitHub top language](https://img.shields.io/github/languages/top/SEU-USUARIO/SEU-REPOSITORIO?style=for-the-badge)
-![GitHub last commit](https://img.shields.io/github/last-commit/SEU-USUARIO/SEU-REPOSITORIO?style=for-the-badge)
+![GitHub language count](https://img.shields.io/github/languages/count/OS-MUNHECAS/venda-mais-app?style=for-the-badge)
+![GitHub top language](https://img.shields.io/github/languages/top/OS-MUNHECAS/venda-mais-app?style=for-the-badge)
+![GitHub last commit](https://img.shields.io/github/last-commit/OS-MUNHECAS/venda-mais-app?style=for-the-badge)
 
-O **Venda+** (Venda Plus) é um aplicativo mobile para gestão de vendas, desenvolvido como projeto da disciplina de Tópicos Especiais II. Ele foi projetado para ser uma ferramenta simples e eficiente para autônomos e pequenas empresas.
+Aplicativo mobile para gestão de vendas desenvolvido em React Native com Expo. Projeto da disciplina de Tópicos Especiais II do IFSULDEMINAS.
 
-## 1. Objetivo e Público-Alvo
+## Objetivo
 
-O objetivo é capacitar o microempreendedor a gerenciar suas vendas, produtos e clientes de forma organizada diretamente do celular, substituindo planilhas complexas ou sistemas caros.
+Ferramenta simples e eficiente para microempreendedores gerenciarem vendas, produtos e clientes diretamente do celular, substituindo planilhas ou sistemas complexos.
 
-*   **Público-Alvo:** Pequenas empresas, vendedores autônomos e demais.
+**Público-Alvo:** Pequenas empresas, vendedores autônomos e microempreendedores.
 
-## 2. Funcionalidades Planejadas
+## Funcionalidades
 
-O escopo do projeto está focado nas seguintes funcionalidades essenciais:
+### Implementadas
+- **Gestão de Clientes:** Lista com busca e filtros por status
+- **Interface Responsiva:** Layout adaptável para diferentes tamanhos de tela
+- **Tipagem TypeScript:** Código type-safe e bem estruturado
 
--   **Gestão de Clientes e Produtos (CRUD):** Cadastro, consulta, edição e remoção.
--   **Registro de Vendas:** Lançamento de vendas associando clientes e produtos.
--   **Persistência Local:** Os dados são salvos no dispositivo para acesso rápido e offline.
--   **Recursos Nativos:** Uso de câmera, biometria (*Estamos avaliando) e compartilhamento para melhorar a experiência.
--   **Integração com API:** Consulta de CEP para preenchimento automático de endereço.
+### Planejadas
+- **CRUD Completo:** Cadastro, edição e exclusão de clientes/produtos
+- **Registro de Vendas:** Lançamento de vendas com associação cliente-produto
+- **Persistência Local:** SQLite para acesso offline
+- **Recursos Nativos:** Câmera, biometria e compartilhamento
+- **Integração com API:** Consulta de CEP
 
-## 3. Tecnologias e Arquitetura
+## Tecnologias
 
-A arquitetura foi planejada para ser moderna e eficiente, utilizando tecnologias alinhadas às boas práticas de mercado.
+| Componente | Tecnologia | Versão |
+|:-----------|:-----------|:-------|
+| **Framework** | React Native + Expo | ~54.0.10 |
+| **Linguagem** | TypeScript | ~5.9.2 |
+| **Navegação** | Expo Router | ~6.0.8 |
+| **UI Components** | React Native | 0.81.4 |
+| **Animações** | Reanimated | ~4.1.0 |
 
-| Componente          | Tecnologia Escolhida      | Justificativa da Escolha                                                                    |
-| :------------------ | :------------------------ | :------------------------------------------------------------------------------------------ |
-| **Framework**       | React Native com Expo     | Desenvolvimento multiplataforma (Android/iOS) com um único código e ambiente simplificado.    |
-| **Navegação**       | Expo Router               | Estrutura de rotas baseada em arquivos, tornando a navegação mais intuitiva e organizada.   |
-| **Persistência Local**| SQLite (via `expo-sqlite`)| Banco de dados relacional simples para garantir a integridade dos dados e o acesso offline. |
+## Estrutura do Projeto
 
-## 4. Como Executar o Projeto
+```
+venda-mais-app/
+├── app/                    # Estrutura de rotas (Expo Router)
+│   ├── (tabs)/            # Navegação por abas
+│   │   ├── clientes.tsx   # Tela de clientes (implementada)
+│   │   ├── produtos.tsx   # Tela de produtos
+│   │   ├── pedidos.tsx    # Tela de pedidos
+│   │   ├── historico.tsx  # Histórico de vendas
+│   │   ├── index.tsx      # Tela inicial
+│   │   └── types/         # Tipos TypeScript
+│   ├── _layout.tsx        # Layout raiz
+│   └── +not-found.tsx     # Página 404
+├── components/            # Componentes reutilizáveis
+├── constants/             # Constantes e temas
+├── hooks/                 # Hooks customizados
+└── assets/               # Imagens e recursos
+```
 
-O projeto está em sua fase inicial de desenvolvimento. As instruções abaixo são para configurar o ambiente. O aplicativo em si ainda não possui funcionalidades implementadas.
+## Como Executar
 
-**1. Pré-requisitos**
+### Pré-requisitos
+- [Node.js LTS](https://nodejs.org/)
+- [Git](https://git-scm.com/)
+- [Expo CLI](https://docs.expo.dev/get-started/installation/)
 
-*   [Node.js (versão LTS)](https://nodejs.org/en/)
-*   [Git](https://git-scm.com/)
-
-**2. Configuração Inicial**
+### Instalação
 
 ```bash
-# 1. Clone o repositório
-git clone https://github.com/SEU-USUARIO/SEU-REPOSITORIO.git
+# Clone o repositório
+git clone https://github.com/OS-MUNHECAS/venda-mais-app.git
 
-# 2. Entre na pasta do projeto
-cd SEU-REPOSITORIO
+# Entre na pasta do projeto
+cd venda-mais-app
 
-# 3. Instale as dependências (serão adicionadas em breve)
-# npm install
+# Instale as dependências
+npm install
+
+# Inicie o servidor de desenvolvimento
+npm start
 ```
-*(As dependências do projeto serão adicionadas nos próximos commits.)*
 
-## 🤝 Equipe do Projeto
+### Executar em dispositivo
 
-| Nome | Papel no Projeto | GitHub |
-| :--- | :--- | :--- |
-| `Diogo Henrique da Silva` | Líder do Projeto / Desenvolvedor | [@Diogohs630](https://github.com/Diogohs630 ) |
-| `Andre Luiz da Silva` | Desenvolvedor | [@andreflabr](https://github.com/andreflabr ) |
-| `Leonardo Rodrigues Gabriel` | Desenvolvedor | [@leorgabriel](https://github.com/leorgabriel ) |
+```bash
+# Android
+npm run android
+
+# iOS (requer macOS)
+npm run ios
+
+# Web
+npm run web
+```
+
+### Scripts Disponíveis
+
+```bash
+npx expo start          # Inicia o servidor Expo
+```
+
+## Status do Desenvolvimento
+
+### Telas Implementadas
+- ✅ **Clientes** - Lista com busca e filtros
+- ⏳ **Produtos** - Em desenvolvimento
+- ⏳ **Pedidos** - Planejada
+- ⏳ **Histórico** - Planejada
+- ⏳ **Dashboard** - Planejada
+
+## Dependências Principais
+
+```json
+{
+  "expo": "~54.0.10",
+  "react": "19.1.0",
+  "react-native": "0.81.4",
+  "expo-router": "~6.0.8",
+  "typescript": "~5.9.2",
+  "@react-navigation/bottom-tabs": "^7.4.0",
+  "react-native-reanimated": "~4.1.0"
+}
+```
+
+## Contribuição
+
+1. Faça um clone do projeto
+2. Crie uma branch para sua feature (`git checkout -b feature/nova-funcionalidade`)
+3. Commit suas mudanças (`git commit -m 'feat: adicionar nova funcionalidade'`)
+4. Push para a branch (`git push origin feature/nova-funcionalidade`)
+5. Abra um Pull Request
+
+## Equipe
+
+| Nome | Papel | GitHub |
+|:-----|:------|:-------|
+| Diogo Henrique da Silva | Líder do Projeto | [@Diogohs630](https://github.com/Diogohs630) |
+| Andre Luiz da Silva | Desenvolvedor | [@andreflabr](https://github.com/andreflabr) |
+| Leonardo Rodrigues Gabriel | Desenvolvedor | [@leorgabriel](https://github.com/leorgabriel) |
