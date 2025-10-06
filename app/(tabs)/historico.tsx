@@ -1,10 +1,10 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
-export default function ClientesScreen() {
+export default function HistoricoScreen() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Clientes</Text>
+      <Text style={styles.title}>Histórico</Text>
       <Text style={styles.subtitle}>Funcionalidade em desenvolvimento</Text>
     </View>
   );
