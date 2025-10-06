@@ -1,16 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   Text,
   View,
   FlatList,
   TouchableOpacity,
+  TextInput,
   SafeAreaView,
   StatusBar
 } from 'react-native';
-import { Customer, Contact } from './types/customer';
+import { Customer, Contact, FilterType } from './types/customer';
 
-// Mock data simulando dados vindos do backend
+// simulando dados vindos do backend
 const mockCustomers: Customer[] = [
   {
     id_customer: 1,
@@ -26,11 +27,68 @@ const mockCustomers: Customer[] = [
     contacts: [
       { contact_type: "E", value: "diogo@hotmail.com.br" }
     ]
+  },
+  {
+    id_customer: 2,
+    person: {
+      id_person: 2,
+      name: "Cooxupe",
+      person_type: "J",
+      cpf_cnpj: "12.345.678/0001-90",
+      active: true
+    },
+    active: true,
+    last_purchase: "2024-10-01T14:20:00Z",
+    contacts: [
+      { contact_type: "E", value: "contato@cooxupe.com.br" },
+      { contact_type: "T", value: "(11) 3333-5678" }
+    ]
+  },
+  {
+    id_customer: 3,
+    person: {
+      id_person: 3,
+      name: "Leor Gabriel",
+      person_type: "F",
+      cpf_cnpj: "987.654.321-00",
+      active: false
+    },
+    active: false,
+    last_purchase: "2024-08-20T16:45:00Z",
+    contacts: [
+      { contact_type: "E", value: "leor.gabriel@gmail.com" },
+      { contact_type: "T", value: "(11) 88888-9999" }
+    ]
   }
 ];
 
 export default function ClientesScreen() {
   const [customers] = useState<Customer[]>(mockCustomers);
+  const [filteredCustomers, setFilteredCustomers] = useState<Customer[]>(mockCustomers);
+  const [searchText, setSearchText] = useState<string>('');
+  const [filterActive, setFilterActive] = useState<FilterType>('all');
+
+  // Função para filtrar clientes
+  useEffect(() => {
+    let filtered = customers;
+
+    // Filtro por texto
+    if (searchText.trim()) {
+      filtered = filtered.filter(customer =>
+        customer.person.name.toLowerCase().includes(searchText.toLowerCase()) ||
+        customer.person.cpf_cnpj.includes(searchText)
+      );
+    }
+
+    // Filtro por status
+    if (filterActive !== 'all') {
+      filtered = filtered.filter(customer =>
+        filterActive === 'active' ? customer.active : !customer.active
+      );
+    }
+
+    setFilteredCustomers(filtered);
+  }, [searchText, filterActive, customers]);
 
   // Função para formatar data
   const formatDate = (dateString: string | null): string => {
@@ -94,13 +152,57 @@ export default function ClientesScreen() {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#2196F3" />
 
+      {/* Search Bar */}
+      <View style={styles.searchContainer}>
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Buscar por nome ou documento..."
+          value={searchText}
+          onChangeText={setSearchText}
+          placeholderTextColor="#999"
+        />
+      </View>
+
+      {/* Filter Buttons */}
+      <View style={styles.filterContainer}>
+        {([
+          { key: 'all' as FilterType, label: 'Todos', count: customers.length },
+          { key: 'active' as FilterType, label: 'Ativos', count: customers.filter(c => c.active).length },
+          { key: 'inactive' as FilterType, label: 'Inativos', count: customers.filter(c => !c.active).length }
+        ]).map(filter => (
+          <TouchableOpacity
+            key={filter.key}
+            style={[
+              styles.filterButton,
+              filterActive === filter.key && styles.activeFilterButton
+            ]}
+            onPress={() => setFilterActive(filter.key)}
+          >
+            <Text style={[
+              styles.filterButtonText,
+              filterActive === filter.key && styles.activeFilterButtonText
+            ]}>
+              {filter.label} ({filter.count})
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
       {/* Customer List */}
       <FlatList
-        data={customers}
+        data={filteredCustomers}
         keyExtractor={(item) => item.id_customer.toString()}
         renderItem={({ item }) => <CustomerCard item={item} />}
         contentContainerStyle={styles.listContainer}
         showsVerticalScrollIndicator={false}
+        ListEmptyComponent={
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>Nenhum cliente encontrado</Text>
+            <Text style={styles.emptySubtext}>
+              Tente ajustar os filtros ou termo de busca
+            </Text>
+          </View>
+        }
       />
 
       {/* Add Button */}
@@ -119,8 +221,52 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f5f5f5',
   },
+  searchContainer: {
+    padding: 16,
+    backgroundColor: 'white',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  searchInput: {
+    backgroundColor: '#f8f8f8',
+    borderRadius: 12,
+    padding: 12,
+    fontSize: 16,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  filterContainer: {
+    flexDirection: 'row',
+    padding: 16,
+    paddingTop: 8,
+    backgroundColor: 'white',
+    gap: 8,
+  },
+  filterButton: {
+    flex: 1,
+    backgroundColor: '#f0f0f0',
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  activeFilterButton: {
+    backgroundColor: '#2196F3',
+  },
+  filterButtonText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#666',
+  },
+  activeFilterButtonText: {
+    color: 'white',
+  },
   listContainer: {
     padding: 16,
+    paddingTop: 8,
   },
   customerCard: {
     backgroundColor: 'white',
@@ -206,6 +352,23 @@ const styles = StyleSheet.create({
   contactText: {
     fontSize: 14,
     color: '#555',
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 60,
+  },
+  emptyText: {
+    fontSize: 18,
+    fontWeight: '500',
+    color: '#666',
+    marginBottom: 8,
+  },
+  emptySubtext: {
+    fontSize: 14,
+    color: '#999',
+    textAlign: 'center',
   },
   addButton: {
     position: 'absolute',
