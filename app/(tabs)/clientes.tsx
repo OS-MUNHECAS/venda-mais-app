@@ -8,69 +8,63 @@ import {
   TextInput,
   SafeAreaView,
   StatusBar,
-  useWindowDimensions
+  useWindowDimensions,
+  Alert,
+  RefreshControl,
+  Image,
 } from 'react-native';
 import { Customer, Contact, FilterType } from './types/customer';
-
-// simulando dados
-const mockCustomers: Customer[] = [
-  {
-    id_customer: 1,
-    person: {
-      id_person: 1,
-      name: "Diogo Silva",
-      person_type: "F",
-      cpf_cnpj: "123.456.789-00",
-      active: true
-    },
-    active: true,
-    last_purchase: null,
-    contacts: [
-      { contact_type: "E", value: "diogo@hotmail.com.br" }
-    ]
-  },
-  {
-    id_customer: 2,
-    person: {
-      id_person: 2,
-      name: "Cooxupe",
-      person_type: "J",
-      cpf_cnpj: "12.345.678/0001-90",
-      active: true
-    },
-    active: true,
-    last_purchase: "2024-10-01T14:20:00Z",
-    contacts: [
-      { contact_type: "E", value: "contato@cooxupe.com.br" },
-      { contact_type: "T", value: "(11) 3333-5678" }
-    ]
-  },
-  {
-    id_customer: 3,
-    person: {
-      id_person: 3,
-      name: "Leor Gabriel",
-      person_type: "F",
-      cpf_cnpj: "987.654.321-00",
-      active: false
-    },
-    active: false,
-    last_purchase: "2024-08-20T16:45:00Z",
-    contacts: [
-      { contact_type: "E", value: "leor.gabriel@gmail.com" },
-      { contact_type: "T", value: "(11) 88888-9999" }
-    ]
-  }
-];
+import { CustomerService } from '../../services/customer.service';
+import CreateCustomerModal from '../../components/CreateCustomerModal';
+import EditCustomerModal from '../../components/EditCustomerModal';
+import CustomerDetailsScreen from '../../components/CustomerDetailsScreen';
+import DeleteCustomerModal from '../../components/DeleteCustomerModal';
 
 export default function ClientesScreen() {
-  const [customers] = useState<Customer[]>(mockCustomers);
-  const [filteredCustomers, setFilteredCustomers] = useState<Customer[]>(mockCustomers);
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [filteredCustomers, setFilteredCustomers] = useState<Customer[]>([]);
   const [searchText, setSearchText] = useState<string>('');
   const [filterActive, setFilterActive] = useState<FilterType>('all');
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  // Estados dos modais
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDetailsScreen, setShowDetailsScreen] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedCustomerId, setSelectedCustomerId] = useState<number | null>(null);
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
 
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
+
+  // Carrega clientes na inicialização
+  useEffect(() => {
+    loadCustomers();
+  }, []);
+
+  // Função para carregar clientes
+  const loadCustomers = async () => {
+    try {
+      setLoading(true);
+      const data = await CustomerService.getAll();
+      console.log('clientes.tsx - loadCustomers() - Clientes carregados:', data.length);
+      console.log('clientes.tsx - loadCustomers() - IDs:', data.map(c => c.id_customer));
+      setCustomers(data);
+    } catch (error) {
+      Alert.alert('Erro', 'Não foi possível carregar os clientes');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Função para recarregar (pull to refresh)
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await loadCustomers();
+    setRefreshing(false);
+  };
 
   // Função para filtrar clientes
   useEffect(() => {
@@ -80,7 +74,10 @@ export default function ClientesScreen() {
     if (searchText.trim()) {
       filtered = filtered.filter(customer =>
         customer.person.name.toLowerCase().includes(searchText.toLowerCase()) ||
-        customer.person.cpf_cnpj.includes(searchText)
+        customer.person.cpf_cnpj.includes(searchText) ||
+        customer.contacts.some(contact =>
+          contact.value.toLowerCase().includes(searchText.toLowerCase())
+        )
       );
     }
 
@@ -107,6 +104,36 @@ export default function ClientesScreen() {
     return contact?.value || 'Não informado';
   };
 
+  // Funções de navegação
+  const handleCustomerPress = (customer: Customer) => {
+    setSelectedCustomer(customer);
+    setSelectedCustomerId(customer.id_customer);
+    setShowDetailsScreen(true);
+  };
+
+  const handleEditCustomer = (customer?: Customer) => {
+    if (customer) {
+      setSelectedCustomer(customer);
+      setSelectedCustomerId(customer.id_customer);
+    }
+    setShowDetailsScreen(false);
+    setShowEditModal(true);
+  };
+
+  const handleDeleteCustomer = (customer?: Customer) => {
+    if (customer) {
+      setSelectedCustomer(customer);
+    }
+    setShowDetailsScreen(false);
+    setShowDeleteModal(true);
+  };
+
+  const handleSuccess = () => {
+    loadCustomers(); // Recarrega a lista
+    setSelectedCustomer(null);
+    setSelectedCustomerId(null);
+  };
+
   // Componente do Card do Cliente
   const CustomerCard = ({ item }: { item: Customer }) => (
     <TouchableOpacity
@@ -115,9 +142,34 @@ export default function ClientesScreen() {
         !item.active && styles.inactiveCard,
         isTablet && styles.tabletCard
       ]}
-      onPress={() => console.log('Cliente selecionado:', item.id_customer)}
+      onPress={() => handleCustomerPress(item)}
+      onLongPress={() => {
+        Alert.alert(
+          'Opções',
+          `O que deseja fazer com ${item.person.name}?`,
+          [
+            { text: 'Cancelar', style: 'cancel' },
+            { text: 'Visualizar', onPress: () => handleCustomerPress(item) },
+            { text: 'Editar', onPress: () => handleEditCustomer(item) },
+            { text: 'Excluir', style: 'destructive', onPress: () => handleDeleteCustomer(item) },
+          ]
+        );
+      }}
     >
       <View style={styles.cardHeader}>
+        {/* Foto do Cliente */}
+        <View style={styles.avatarContainer}>
+          {item.photo_uri ? (
+            <Image source={{ uri: item.photo_uri }} style={styles.avatar} />
+          ) : (
+            <View style={styles.avatarPlaceholder}>
+              <Text style={styles.avatarText}>
+                {item.person.name.charAt(0).toUpperCase()}
+              </Text>
+            </View>
+          )}
+        </View>
+
         <View style={styles.customerInfo}>
           <Text style={styles.customerName}>{item.person.name}</Text>
           <View style={styles.typeContainer}>
@@ -202,11 +254,21 @@ export default function ClientesScreen() {
         showsVerticalScrollIndicator={false}
         numColumns={isTablet ? 2 : 1}
         key={isTablet ? 'tablet' : 'phone'} // ajuste responsividade
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            colors={['#2196F3']}
+            tintColor="#2196F3"
+          />
+        }
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>Nenhum cliente encontrado</Text>
+            <Text style={styles.emptyText}>
+              {loading ? 'Carregando...' : 'Nenhum cliente encontrado'}
+            </Text>
             <Text style={styles.emptySubtext}>
-              Tente ajustar os filtros ou termo de busca
+              {loading ? 'Por favor, aguarde' : 'Tente ajustar os filtros ou termo de busca'}
             </Text>
           </View>
         }
@@ -215,10 +277,53 @@ export default function ClientesScreen() {
       {/* Add Button */}
       <TouchableOpacity
         style={styles.addButton}
-        onPress={() => console.log('Adicionar novo cliente')}
+        onPress={() => setShowCreateModal(true)}
       >
         <Text style={styles.addButtonText}>+</Text>
       </TouchableOpacity>
+
+      {/* Modais e Telas */}
+      <CreateCustomerModal
+        visible={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onSuccess={handleSuccess}
+      />
+
+      <EditCustomerModal
+        visible={showEditModal}
+        customerId={selectedCustomerId}
+        onClose={() => {
+          setShowEditModal(false);
+          setSelectedCustomerId(null);
+          setSelectedCustomer(null);
+        }}
+        onSuccess={handleSuccess}
+      />
+
+      {showDetailsScreen && selectedCustomer && (
+        <View style={StyleSheet.absoluteFillObject}>
+          <CustomerDetailsScreen
+            customerId={selectedCustomer.id_customer}
+            onEdit={() => handleEditCustomer(selectedCustomer)}
+            onDelete={() => handleDeleteCustomer(selectedCustomer)}
+            onClose={() => {
+              setShowDetailsScreen(false);
+              setSelectedCustomer(null);
+              setSelectedCustomerId(null);
+            }}
+          />
+        </View>
+      )}
+
+      <DeleteCustomerModal
+        visible={showDeleteModal}
+        customer={selectedCustomer}
+        onClose={() => {
+          setShowDeleteModal(false);
+          setSelectedCustomer(null);
+        }}
+        onSuccess={handleSuccess}
+      />
     </SafeAreaView>
   );
 }
@@ -399,6 +504,29 @@ const styles = StyleSheet.create({
   },
   addButtonText: {
     fontSize: 24,
+    fontWeight: 'bold',
+    color: 'white',
+  },
+  // Estilos para Avatar
+  avatarContainer: {
+    marginRight: 12,
+  },
+  avatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#f0f0f0',
+  },
+  avatarPlaceholder: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#2196F3',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  avatarText: {
+    fontSize: 20,
     fontWeight: 'bold',
     color: 'white',
   },
