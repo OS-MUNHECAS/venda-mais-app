@@ -6,6 +6,14 @@
 
 Aplicativo mobile para gestão de vendas desenvolvido em React Native com Expo. Projeto da disciplina de Tópicos Especiais II do IFSULDEMINAS.
 
+## Arquitetura
+
+- **Frontend Mobile:** React Native com Expo (Cross-platform)
+- **Navegação:** Expo Router (File-based routing)
+- **Estado:** Context API + LocalStorage
+- **Persistência:** LocalStorage (Web) / Memory Storage (Mobile)
+- **Tipagem:** TypeScript para type safety
+
 ## Objetivo
 
 Ferramenta simples e eficiente para microempreendedores gerenciarem vendas, produtos e clientes diretamente do celular, substituindo planilhas ou sistemas complexos.
@@ -15,26 +23,26 @@ Ferramenta simples e eficiente para microempreendedores gerenciarem vendas, prod
 ## Funcionalidades
 
 ### Implementadas
-- **Gestão de Clientes:** Lista com busca e filtros por status
-- **Interface Responsiva:** Layout adaptável para diferentes tamanhos de tela
-- **Tipagem TypeScript:** Código type-safe e bem estruturado
+- **Gestão de Clientes:** CRUD completo com busca e filtros
+- **Recursos Nativos:** Câmera e galeria para fotos de clientes
+- **Persistência Local:** Dados salvos no LocalStorage
+- **Interface Profissional:** Design limpo e responsivo
 
 ### Planejadas
-- **CRUD Completo:** Cadastro, edição e exclusão de clientes/produtos
-- **Registro de Vendas:** Lançamento de vendas com associação cliente-produto
-- **Persistência Local:** SQLite para acesso offline
-- **Recursos Nativos:** Câmera, biometria e compartilhamento
+- **Gestão de Produtos:** CRUD completo de produtos
+- **Registro de Vendas:** Lançamento de vendas
+- **Relatórios:** Histórico e métricas de vendas
 - **Integração com API:** Consulta de CEP
 
-## Tecnologias
+## Stack Tecnológica
 
 | Componente | Tecnologia | Versão |
 |:-----------|:-----------|:-------|
 | **Framework** | React Native + Expo | ~54.0.10 |
 | **Linguagem** | TypeScript | ~5.9.2 |
 | **Navegação** | Expo Router | ~6.0.8 |
-| **UI Components** | React Native | 0.81.4 |
-| **Animações** | Reanimated | ~4.1.0 |
+| **Recursos Nativos** | expo-image-picker | Latest |
+| **Persistência** | LocalStorage / Memory | Nativo |
 
 ## Estrutura do Projeto
 
@@ -56,70 +64,38 @@ venda-mais-app/
 └── assets/               # Imagens e recursos
 ```
 
-## Como Executar
+## Executar Localmente
 
 ### Pré-requisitos
 - [Node.js LTS](https://nodejs.org/)
 - [Git](https://git-scm.com/)
-- [Expo CLI](https://docs.expo.dev/get-started/installation/)
 
-### Instalação
+### Instalação e Execução
 
 ```bash
 # Clone o repositório
 git clone https://github.com/OS-MUNHECAS/venda-mais-app.git
-
-# Entre na pasta do projeto
 cd venda-mais-app
 
-# Instale as dependências
+# Instale dependências e execute
 npm install
-
-# Inicie o servidor de desenvolvimento
-npm start
+npx expo start
 ```
 
-### Executar em dispositivo
+### Opções de Execução
 
 ```bash
-# Android
-npm run android
-
-# iOS (requer macOS)
-npm run ios
-
-# Web
-npm run web
-```
-
-### Scripts Disponíveis
-
-```bash
-npx expo start          # Inicia o servidor Expo
+npx expo start --web     # Executar no navegador
+npx expo start --android # Executar no Android
+npx expo start --ios     # Executar no iOS (macOS)
 ```
 
 ## Status do Desenvolvimento
 
-### Telas Implementadas
-- ✅ **Clientes** - Lista com busca e filtros
+- ✅ **Clientes** - CRUD completo com fotos
 - ⏳ **Produtos** - Em desenvolvimento
-- ⏳ **Pedidos** - Planejada
-- ⏳ **Histórico** - Planejada
-- ⏳ **Dashboard** - Planejada
-
-## Dependências Principais
-
-```json
-{
-  "expo": "~54.0.10",
-  "react": "19.1.0",
-  "react-native": "0.81.4",
-  "expo-router": "~6.0.8",
-  "typescript": "~5.9.2",
-  "@react-navigation/bottom-tabs": "^7.4.0",
-  "react-native-reanimated": "~4.1.0"
-}
-```
+- ⏳ **Pedidos** - Planejado
+- ⏳ **Histórico** - Planejado
 
 ## Contribuição
 
