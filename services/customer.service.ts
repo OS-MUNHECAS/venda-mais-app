@@ -1,25 +1,18 @@
-// Serviço para gerenciar operações CRUD de clientes
+// Gerencia operações de clientes
 import { Customer, CustomerFormData, Contact } from '../app/(tabs)/types/customer';
 import { Address, AddressFormData } from '../app/(tabs)/types/address';
 import { StorageService } from './storage.service';
 
 export class CustomerService {
-    /**
-     * Lista todos os clientes
-     */
+    
     static async getAll(): Promise<Customer[]> {
         const customers = await StorageService.loadCustomers();
-        
-        // Simula delay de API
         await new Promise(resolve => setTimeout(resolve, 300));
         console.log('CustomerService.getAll() - Total de clientes:', customers.length);
         console.log('CustomerService.getAll() - IDs dos clientes:', customers.map((c: Customer) => c.id_customer));
         return [...customers];
     }
 
-    /**
-     * Busca cliente por ID
-     */
     static async getById(id: number): Promise<Customer | null> {
         const customers = await StorageService.loadCustomers();
         await new Promise(resolve => setTimeout(resolve, 200));
@@ -27,9 +20,6 @@ export class CustomerService {
         return customer ? { ...customer } : null;
     }
 
-    /**
-     * Busca clientes por filtros
-     */
     static async search(filters: {
         query?: string;
         active?: boolean;
@@ -64,17 +54,11 @@ export class CustomerService {
         return filtered;
     }
 
-    /**
-     * Cria um novo cliente
-     */
     static async create(customerData: CustomerFormData): Promise<Customer> {
         const customers = await StorageService.loadCustomers();
         await new Promise(resolve => setTimeout(resolve, 500));
 
-        // Validações
         this.validateCustomerData(customerData);
-
-        // Verifica se CPF/CNPJ já existe
         const existingCustomer = customers.find((c: Customer) =>
             c.person.cpf_cnpj === customerData.cpf_cnpj
         );
@@ -116,16 +100,11 @@ export class CustomerService {
         customers.push(newCustomer);
         console.log('CustomerService.create() - Cliente criado:', newCustomer.id_customer, newCustomer.person.name);
         console.log('CustomerService.create() - Total de clientes após criação:', customers.length);
-        
-        // Salva no storage
         await StorageService.saveCustomers(customers);
         
         return { ...newCustomer };
     }
 
-    /**
-     * Atualiza um cliente existente
-     */
     static async update(id: number, customerData: Partial<CustomerFormData>): Promise<Customer> {
         const customers = await StorageService.loadCustomers();
         await new Promise(resolve => setTimeout(resolve, 500));
@@ -137,7 +116,6 @@ export class CustomerService {
 
         const existingCustomer = customers[customerIndex];
 
-        // Verifica se CPF/CNPJ já existe em outro cliente
         if (customerData.cpf_cnpj) {
             const duplicateCustomer = customers.find((c: Customer) =>
                 c.person.cpf_cnpj === customerData.cpf_cnpj && c.id_customer !== id
@@ -179,16 +157,11 @@ export class CustomerService {
         };
 
         customers[customerIndex] = updatedCustomer;
-        
-        // Salva no storage
         await StorageService.saveCustomers(customers);
         
         return { ...updatedCustomer };
     }
 
-    /**
-     * Exclui um cliente (soft delete)
-     */
     static async delete(id: number): Promise<void> {
         const customers = await StorageService.loadCustomers();
         await new Promise(resolve => setTimeout(resolve, 300));
@@ -198,7 +171,6 @@ export class CustomerService {
             throw new Error('Cliente não encontrado');
         }
 
-        // Soft delete - marca como inativo
         customers[customerIndex] = {
             ...customers[customerIndex],
             active: false,
@@ -209,14 +181,9 @@ export class CustomerService {
             },
             updated_at: new Date().toISOString(),
         };
-
-        // Salva no storage
         await StorageService.saveCustomers(customers);
     }
 
-    /**
-     * Exclui permanentemente um cliente
-     */
     static async hardDelete(id: number): Promise<void> {
         const customers = await StorageService.loadCustomers();
         await new Promise(resolve => setTimeout(resolve, 300));
@@ -227,14 +194,9 @@ export class CustomerService {
         }
 
         customers.splice(customerIndex, 1);
-        
-        // Salva no storage
         await StorageService.saveCustomers(customers);
     }
 
-    /**
-     * Gera próximo ID disponível
-     */
     private static getNextId(customers: Customer[]): number {
         if (customers.length === 0) return 1;
         return Math.max(...customers.map((c: Customer) => c.id_customer)) + 1;

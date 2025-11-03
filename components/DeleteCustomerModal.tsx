@@ -27,16 +27,16 @@ export default function DeleteCustomerModal({ visible, customer, onClose, onSucc
             setLoading(true);
             await CustomerService.delete(customer.id_customer);
 
-            Alert.alert('Sucesso', 'Cliente desativado com sucesso!', [
+            Alert.alert('Cliente Desativado', 'O cliente foi desativado com sucesso.', [
                 {
-                    text: 'OK', onPress: () => {
+                    text: 'Continuar', onPress: () => {
                         onSuccess();
                         onClose();
                     }
                 }
             ]);
         } catch (error) {
-            Alert.alert('Erro', error instanceof Error ? error.message : 'Erro ao desativar cliente');
+            Alert.alert('Erro na Operação', error instanceof Error ? error.message : 'Não foi possível desativar o cliente.');
         } finally {
             setLoading(false);
         }
@@ -58,16 +58,16 @@ export default function DeleteCustomerModal({ visible, customer, onClose, onSucc
                             setLoading(true);
                             await CustomerService.hardDelete(customer.id_customer);
 
-                            Alert.alert('Sucesso', 'Cliente excluído permanentemente!', [
+                            Alert.alert('Cliente Excluído', 'O cliente foi excluído permanentemente.', [
                                 {
-                                    text: 'OK', onPress: () => {
+                                    text: 'Continuar', onPress: () => {
                                         onSuccess();
                                         onClose();
                                     }
                                 }
                             ]);
                         } catch (error) {
-                            Alert.alert('Erro', error instanceof Error ? error.message : 'Erro ao excluir cliente');
+                            Alert.alert('Erro na Exclusão', error instanceof Error ? error.message : 'Não foi possível excluir o cliente.');
                         } finally {
                             setLoading(false);
                         }
@@ -100,10 +100,10 @@ export default function DeleteCustomerModal({ visible, customer, onClose, onSucc
                             onPress={handleSoftDelete}
                             disabled={loading}
                         >
-                            <Text style={styles.optionTitle}>🔒 Desativar Cliente</Text>
+                            <Text style={styles.optionTitle}>Desativar Cliente</Text>
                             <Text style={styles.optionDescription}>
-                                Cliente ficará inativo, mas os dados serão mantidos.
-                                Pode ser reativado a qualquer momento.
+                                O cliente ficará inativo, mas os dados serão mantidos.
+                                Pode ser reativado posteriormente.
                             </Text>
                         </TouchableOpacity>
 
@@ -112,7 +112,7 @@ export default function DeleteCustomerModal({ visible, customer, onClose, onSucc
                             onPress={handleHardDelete}
                             disabled={loading}
                         >
-                            <Text style={[styles.optionTitle, styles.destructiveText]}>🗑️ Excluir Permanentemente</Text>
+                            <Text style={[styles.optionTitle, styles.destructiveText]}>Excluir Permanentemente</Text>
                             <Text style={[styles.optionDescription, styles.destructiveText]}>
                                 Remove todos os dados do cliente permanentemente.
                                 Esta ação não pode ser desfeita.

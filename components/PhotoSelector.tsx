@@ -19,7 +19,7 @@ export default function PhotoSelector({ photoUri, onPhotoSelected, onPhotoRemove
     const pickImage = async () => {
         Alert.alert(
             'Selecionar Foto',
-            'Escolha uma opção:',
+            'Escolha a origem da foto:',
             [
                 { text: 'Cancelar', style: 'cancel' },
                 { text: 'Câmera', onPress: () => openCamera() },
@@ -29,17 +29,16 @@ export default function PhotoSelector({ photoUri, onPhotoSelected, onPhotoRemove
     };
 
     const openCamera = async () => {
-        // Solicita permissão da câmera
         const { status } = await ImagePicker.requestCameraPermissionsAsync();
         if (status !== 'granted') {
-            Alert.alert('Erro', 'Permissão da câmera é necessária!');
+            Alert.alert('Permissão Necessária', 'É necessário permitir o acesso à câmera para continuar.');
             return;
         }
 
         const result = await ImagePicker.launchCameraAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             allowsEditing: true,
-            aspect: [1, 1], // Quadrado
+            aspect: [1, 1],
             quality: 0.8,
         });
 
@@ -49,17 +48,16 @@ export default function PhotoSelector({ photoUri, onPhotoSelected, onPhotoRemove
     };
 
     const openGallery = async () => {
-        // Solicita permissão da galeria
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (status !== 'granted') {
-            Alert.alert('Erro', 'Permissão da galeria é necessária!');
+            Alert.alert('Permissão Necessária', 'É necessário permitir o acesso à galeria para continuar.');
             return;
         }
 
         const result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             allowsEditing: true,
-            aspect: [1, 1], // Quadrado
+            aspect: [1, 1],
             quality: 0.8,
         });
 
@@ -71,10 +69,10 @@ export default function PhotoSelector({ photoUri, onPhotoSelected, onPhotoRemove
     const removePhoto = () => {
         Alert.alert(
             'Remover Foto',
-            'Tem certeza que deseja remover a foto?',
+            'Confirma a remoção da foto do cliente?',
             [
                 { text: 'Cancelar', style: 'cancel' },
-                { text: 'Remover', style: 'destructive', onPress: onPhotoRemoved },
+                { text: 'Confirmar', style: 'destructive', onPress: onPhotoRemoved },
             ]
         );
     };
@@ -91,7 +89,7 @@ export default function PhotoSelector({ photoUri, onPhotoSelected, onPhotoRemove
                             <Text style={styles.buttonText}>📷 Alterar</Text>
                         </TouchableOpacity>
                         <TouchableOpacity style={styles.removeButton} onPress={removePhoto}>
-                            <Text style={styles.removeButtonText}>🗑️ Remover</Text>
+                            <Text style={styles.removeButtonText}>Remover</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -99,7 +97,7 @@ export default function PhotoSelector({ photoUri, onPhotoSelected, onPhotoRemove
                 <TouchableOpacity style={styles.addPhotoButton} onPress={pickImage}>
                     <Text style={styles.addPhotoIcon}>📷</Text>
                     <Text style={styles.addPhotoText}>Adicionar Foto</Text>
-                    <Text style={styles.addPhotoSubtext}>Toque para tirar foto ou selecionar da galeria</Text>
+                    <Text style={styles.addPhotoSubtext}>Câmera ou Galeria</Text>
                 </TouchableOpacity>
             )}
         </View>
@@ -112,8 +110,8 @@ const styles = StyleSheet.create({
     },
     label: {
         fontSize: 16,
-        fontWeight: 'bold',
-        color: '#333',
+        fontWeight: '600',
+        color: '#1F2937',
         marginBottom: 8,
     },
     photoContainer: {
@@ -123,7 +121,7 @@ const styles = StyleSheet.create({
         width: 120,
         height: 120,
         borderRadius: 60,
-        backgroundColor: '#f0f0f0',
+        backgroundColor: '#F3F4F6',
         marginBottom: 12,
     },
     buttonContainer: {
@@ -131,33 +129,33 @@ const styles = StyleSheet.create({
         gap: 12,
     },
     changeButton: {
-        backgroundColor: '#007AFF',
+        backgroundColor: '#3B82F6',
         paddingHorizontal: 16,
-        paddingVertical: 8,
-        borderRadius: 8,
+        paddingVertical: 10,
+        borderRadius: 6,
     },
     removeButton: {
-        backgroundColor: '#FF3B30',
+        backgroundColor: '#DC2626',
         paddingHorizontal: 16,
-        paddingVertical: 8,
-        borderRadius: 8,
+        paddingVertical: 10,
+        borderRadius: 6,
     },
     buttonText: {
-        color: 'white',
+        color: '#FFFFFF',
         fontSize: 14,
-        fontWeight: '600',
+        fontWeight: '500',
     },
     removeButtonText: {
-        color: 'white',
+        color: '#FFFFFF',
         fontSize: 14,
-        fontWeight: '600',
+        fontWeight: '500',
     },
     addPhotoButton: {
-        backgroundColor: '#f8f8f8',
+        backgroundColor: '#FAFAFA',
         borderWidth: 2,
-        borderColor: '#ddd',
+        borderColor: '#D1D5DB',
         borderStyle: 'dashed',
-        borderRadius: 12,
+        borderRadius: 8,
         padding: 24,
         alignItems: 'center',
         justifyContent: 'center',
@@ -169,13 +167,13 @@ const styles = StyleSheet.create({
     },
     addPhotoText: {
         fontSize: 16,
-        fontWeight: '600',
-        color: '#333',
+        fontWeight: '500',
+        color: '#374151',
         marginBottom: 4,
     },
     addPhotoSubtext: {
         fontSize: 12,
-        color: '#666',
+        color: '#6B7280',
         textAlign: 'center',
     },
 });

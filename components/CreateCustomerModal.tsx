@@ -172,9 +172,9 @@ export default function CreateCustomerModal({ visible, onClose, onSuccess }: Pro
                 photo_uri: photoUri || undefined,
             });
 
-            Alert.alert('Sucesso', 'Cliente cadastrado com sucesso!', [
+            Alert.alert('Cliente Cadastrado', 'O cliente foi cadastrado com sucesso.', [
                 {
-                    text: 'OK', onPress: () => {
+                    text: 'Continuar', onPress: () => {
                         resetForm();
                         onSuccess();
                         onClose();
@@ -182,7 +182,7 @@ export default function CreateCustomerModal({ visible, onClose, onSuccess }: Pro
                 }
             ]);
         } catch (error) {
-            Alert.alert('Erro', error instanceof Error ? error.message : 'Erro ao cadastrar cliente');
+            Alert.alert('Erro no Cadastro', error instanceof Error ? error.message : 'Não foi possível cadastrar o cliente.');
         } finally {
             setLoading(false);
         }

@@ -507,7 +507,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: 'white',
   },
-  // Estilos para Avatar
+  // Avatar do cliente
   avatarContainer: {
     marginRight: 12,
   },
@@ -515,19 +515,19 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#F3F4F6',
   },
   avatarPlaceholder: {
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: '#2196F3',
+    backgroundColor: '#6366F1',
     justifyContent: 'center',
     alignItems: 'center',
   },
   avatarText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: 'white',
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#FFFFFF',
   },
 });

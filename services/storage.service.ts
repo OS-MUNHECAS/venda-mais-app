@@ -1,4 +1,4 @@
-// Serviço para gerenciar persistência local usando localStorage (web) ou memoria (mobile)
+
 import { Customer } from '../app/(tabs)/types/customer';
 import { mockCustomers } from '../database/mocks';
 
@@ -6,18 +6,13 @@ export class StorageService {
     private static readonly CUSTOMERS_KEY = '@venda_mais:customers';
     private static memoryStorage: { [key: string]: string } = {};
 
-    /**
-     * Carrega todos os clientes do storage
-     */
     static async loadCustomers(): Promise<Customer[]> {
         try {
             let customersData: string | null = null;
 
-            // Tenta usar localStorage se disponível (web)
             if (typeof window !== 'undefined' && window.localStorage) {
                 customersData = window.localStorage.getItem(this.CUSTOMERS_KEY);
             } else {
-                // Fallback para memória em outros ambientes
                 customersData = this.memoryStorage[this.CUSTOMERS_KEY] || null;
             }
 
@@ -26,29 +21,23 @@ export class StorageService {
                 console.log('StorageService.loadCustomers() - Carregados do storage:', customers.length);
                 return customers;
             } else {
-                // Se não há dados no storage, usa os dados mock iniciais
                 console.log('StorageService.loadCustomers() - Primeiro acesso, usando dados mock');
                 await this.saveCustomers(mockCustomers);
                 return [...mockCustomers];
             }
         } catch (error) {
             console.error('StorageService.loadCustomers() - Erro ao carregar:', error);
-            return [...mockCustomers]; // Fallback para dados mock
+            return [...mockCustomers];
         }
     }
 
-    /**
-     * Salva todos os clientes no storage
-     */
     static async saveCustomers(customers: Customer[]): Promise<void> {
         try {
             const customersData = JSON.stringify(customers);
 
-            // Tenta usar localStorage se disponível (web)
             if (typeof window !== 'undefined' && window.localStorage) {
                 window.localStorage.setItem(this.CUSTOMERS_KEY, customersData);
             } else {
-                // Fallback para memória em outros ambientes
                 this.memoryStorage[this.CUSTOMERS_KEY] = customersData;
             }
 
@@ -59,16 +48,11 @@ export class StorageService {
         }
     }
 
-    /**
-     * Limpa todos os dados de clientes do storage
-     */
     static async clearCustomers(): Promise<void> {
         try {
-            // Tenta usar localStorage se disponível (web)
             if (typeof window !== 'undefined' && window.localStorage) {
                 window.localStorage.removeItem(this.CUSTOMERS_KEY);
             } else {
-                // Fallback para memória em outros ambientes
                 delete this.memoryStorage[this.CUSTOMERS_KEY];
             }
             console.log('StorageService.clearCustomers() - Dados limpos do storage');
@@ -78,18 +62,13 @@ export class StorageService {
         }
     }
 
-    /**
-     * Verifica se existem dados de clientes no storage
-     */
     static async hasCustomersData(): Promise<boolean> {
         try {
             let customersData: string | null = null;
 
-            // Tenta usar localStorage se disponível (web)
             if (typeof window !== 'undefined' && window.localStorage) {
                 customersData = window.localStorage.getItem(this.CUSTOMERS_KEY);
             } else {
-                // Fallback para memória em outros ambientes
                 customersData = this.memoryStorage[this.CUSTOMERS_KEY] || null;
             }
 
