@@ -233,7 +233,7 @@ export default function CreateCustomerModal({ visible, onClose, onSuccess }: Pro
                             <Text style={styles.sectionTitle}>Dados Pessoais</Text>
 
                             {/* Seletor de Foto */}
-                            <PhotoSelector 
+                            <PhotoSelector
                                 photoUri={photoUri}
                                 onPhotoSelected={setPhotoUri}
                                 onPhotoRemoved={() => setPhotoUri('')}

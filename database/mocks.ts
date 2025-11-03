@@ -16,9 +16,9 @@ export const mockCustomers: Customer[] = [
     active: true,
     last_purchase: null,
     contacts: [
-      { 
+      {
         id_contact: 1,
-        contact_type: "E", 
+        contact_type: "E",
         value: "diogo@hotmail.com.br",
         active: true,
         created_at: "2024-01-15T08:00:00Z"
@@ -40,16 +40,16 @@ export const mockCustomers: Customer[] = [
     active: true,
     last_purchase: "2024-10-01T14:20:00Z",
     contacts: [
-      { 
+      {
         id_contact: 2,
-        contact_type: "E", 
+        contact_type: "E",
         value: "contato@cooxupe.com.br",
         active: true,
         created_at: "2024-01-10T09:30:00Z"
       },
-      { 
+      {
         id_contact: 3,
-        contact_type: "T", 
+        contact_type: "T",
         value: "(11) 3333-5678",
         active: true,
         created_at: "2024-01-10T09:30:00Z"
@@ -71,16 +71,16 @@ export const mockCustomers: Customer[] = [
     active: false,
     last_purchase: "2024-08-20T16:45:00Z",
     contacts: [
-      { 
+      {
         id_contact: 4,
-        contact_type: "E", 
+        contact_type: "E",
         value: "leor.gabriel@gmail.com",
         active: true,
         created_at: "2024-01-05T14:15:00Z"
       },
-      { 
+      {
         id_contact: 5,
-        contact_type: "T", 
+        contact_type: "T",
         value: "(11) 88888-9999",
         active: true,
         created_at: "2024-01-05T14:15:00Z"

@@ -4,7 +4,7 @@ import { Address, AddressFormData } from '../app/(tabs)/types/address';
 import { StorageService } from './storage.service';
 
 export class CustomerService {
-    
+
     static async getAll(): Promise<Customer[]> {
         const customers = await StorageService.loadCustomers();
         await new Promise(resolve => setTimeout(resolve, 300));
@@ -71,7 +71,7 @@ export class CustomerService {
 
         const customerId = nextId;
         const personId = nextId + 1;
-        
+
         const newCustomer: Customer = {
             id_customer: customerId,
             person: {
@@ -101,7 +101,7 @@ export class CustomerService {
         console.log('CustomerService.create() - Cliente criado:', newCustomer.id_customer, newCustomer.person.name);
         console.log('CustomerService.create() - Total de clientes após criação:', customers.length);
         await StorageService.saveCustomers(customers);
-        
+
         return { ...newCustomer };
     }
 
@@ -149,8 +149,8 @@ export class CustomerService {
                     updated_at: now,
                 }))
             }),
-            ...(customerData.addresses && { 
-                addresses: customerData.addresses.map(addr => this.convertAddressFormToAddress(addr, nextId + 100)) 
+            ...(customerData.addresses && {
+                addresses: customerData.addresses.map(addr => this.convertAddressFormToAddress(addr, nextId + 100))
             }),
             ...(customerData.observations !== undefined && { observations: customerData.observations }),
             updated_at: now,
@@ -158,7 +158,7 @@ export class CustomerService {
 
         customers[customerIndex] = updatedCustomer;
         await StorageService.saveCustomers(customers);
-        
+
         return { ...updatedCustomer };
     }
 
@@ -216,7 +216,7 @@ export class CustomerService {
 
         const now = new Date().toISOString();
         const nextId = this.getNextId(customers);
-        
+
         const newAddress: Address = {
             id_address: nextId + 200,
             cep: addressData.cep,
@@ -243,10 +243,10 @@ export class CustomerService {
         };
 
         customer.addresses.push(newAddress);
-        
+
         // Salva no storage
         await StorageService.saveCustomers(customers);
-        
+
         return { ...newAddress };
     }
 
@@ -268,7 +268,7 @@ export class CustomerService {
         }
 
         customer.addresses.splice(addressIndex, 1);
-        
+
         // Salva no storage
         await StorageService.saveCustomers(customers);
     }

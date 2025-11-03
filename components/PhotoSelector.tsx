@@ -80,7 +80,7 @@ export default function PhotoSelector({ photoUri, onPhotoSelected, onPhotoRemove
     return (
         <View style={styles.container}>
             <Text style={styles.label}>Foto do Cliente</Text>
-            
+
             {photoUri ? (
                 <View style={styles.photoContainer}>
                     <Image source={{ uri: photoUri }} style={styles.photo} />
