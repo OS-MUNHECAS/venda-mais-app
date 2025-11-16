@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
+    Alert,
     FlatList,
     SafeAreaView,
     StatusBar,
@@ -10,59 +11,98 @@ import {
     useWindowDimensions,
     View
 } from 'react-native';
+import CreateProductModal from '../../components/CreateProductModal';
+import DeleteProductModal from '../../components/DeleteProductModal';
+import EditProductModal from '../../components/EditProductModal';
+import ProductDetailsScreen from '../../components/ProductDetailsScreen';
 import { useTheme } from '../../contexts/ThemeContext';
 import { FilterType, Product } from './types/product';
 
-// simulando dados
+// simulando dados com novo formato
 const mockProducts: Product[] = [
   {
     id_product: 1,
     name: "Café Torrado Premium",
-    price: 45.90,
+    description: "Café especial 100% arábica torrado em pequenos lotes",
+    category: "Grãos",
+    price_cost: 30.00,
+    price_sale: 45.90,
     stock: 150,
+    net_weight: 0.5,
+    gross_weight: 0.6,
+    min_stock: 20,
+    max_stock: 300,
+    unit_measure: "KG",
+    ncm: "09011190",
+    cest: "1700100",
+    default_discount: 5,
     active: true,
-    category: "Grãos"
+    created_at: new Date().toISOString(),
   },
   {
     id_product: 2,
     name: "Azeite Extra Virgem",
-    price: 28.50,
+    description: "Azeite português de primeira prensagem a frio",
+    category: "Mercearia",
+    price_cost: 18.00,
+    price_sale: 28.50,
     stock: 80,
+    net_weight: 0.5,
+    gross_weight: 0.8,
+    unit_measure: "LT",
     active: true,
-    category: "Mercearia"
+    created_at: new Date().toISOString(),
   },
   {
     id_product: 3,
     name: "Queijo Minas Padrão",
-    price: 62.00,
+    category: "Laticínios",
+    price_cost: 45.00,
+    price_sale: 62.00,
     stock: 0,
+    unit_measure: "KG",
     active: false,
-    category: "Laticínios"
+    created_at: new Date().toISOString(),
   },
   {
     id_product: 4,
     name: "Doce de Leite Artesanal",
-    price: 22.00,
+    category: "Doces",
+    price_cost: 12.00,
+    price_sale: 22.00,
     stock: 120,
+    unit_measure: "KG",
     active: true,
-    category: "Doces"
+    created_at: new Date().toISOString(),
   },
   {
     id_product: 5,
     name: "Cachaça Envelhecida",
-    price: 89.90,
+    description: "Cachaça envelhecida em barris de carvalho por 3 anos",
+    category: "Bebidas",
+    price_cost: 60.00,
+    price_sale: 89.90,
     stock: 40,
+    unit_measure: "LT",
+    ncm: "22089000",
     active: false,
-    category: "Bebidas"
+    created_at: new Date().toISOString(),
   }
 ];
 
 export default function ProdutosScreen() {
   const { theme } = useTheme();
-  const [products] = useState<Product[]>(mockProducts);
+  const [products, setProducts] = useState<Product[]>(mockProducts);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>(mockProducts);
   const [searchText, setSearchText] = useState<string>('');
   const [filterActive, setFilterActive] = useState<FilterType>('all');
+
+  // Estados dos modais
+  const [createModalVisible, setCreateModalVisible] = useState(false);
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [detailsModalVisible, setDetailsModalVisible] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
@@ -94,6 +134,56 @@ export default function ProdutosScreen() {
     return `R$ ${value.toFixed(2).replace('.', ',')}`;
   };
 
+  // Funções CRUD
+  const handleCreateProduct = (newProduct: Product) => {
+    setProducts([...products, newProduct]);
+    Alert.alert('Sucesso', 'Produto criado com sucesso!');
+  };
+
+  const handleEditProduct = (updatedProduct: Product) => {
+    setProducts(products.map(p => 
+      p.id_product === updatedProduct.id_product ? updatedProduct : p
+    ));
+    setEditModalVisible(false);
+    setDetailsModalVisible(false);
+    Alert.alert('Sucesso', 'Produto atualizado com sucesso!');
+  };
+
+  const handleDeleteProduct = () => {
+    if (selectedProduct) {
+      setProducts(products.filter(p => p.id_product !== selectedProduct.id_product));
+      setDeleteModalVisible(false);
+      setDetailsModalVisible(false);
+      Alert.alert('Sucesso', 'Produto excluído com sucesso!');
+    }
+  };
+
+  const handleToggleActive = () => {
+    if (selectedProduct) {
+      const updatedProduct = { ...selectedProduct, active: !selectedProduct.active };
+      setProducts(products.map(p => 
+        p.id_product === updatedProduct.id_product ? updatedProduct : p
+      ));
+      setSelectedProduct(updatedProduct);
+      Alert.alert('Sucesso', `Produto ${updatedProduct.active ? 'ativado' : 'desativado'} com sucesso!`);
+    }
+  };
+
+  const openDetails = (product: Product) => {
+    setSelectedProduct(product);
+    setDetailsModalVisible(true);
+  };
+
+  const openEdit = () => {
+    setDetailsModalVisible(false);
+    setEditModalVisible(true);
+  };
+
+  const openDelete = () => {
+    setDetailsModalVisible(false);
+    setDeleteModalVisible(true);
+  };
+
   // Componente do Card do Produto
   const ProductCard = ({ item }: { item: Product }) => (
     <TouchableOpacity
@@ -103,7 +193,7 @@ export default function ProdutosScreen() {
         !item.active && styles.inactiveCard,
         isTablet && styles.tabletCard
       ]}
-      onPress={() => console.log('Produto selecionado:', item.id_product)}
+      onPress={() => openDetails(item)}
     >
       <View style={styles.cardHeader}>
         <View style={styles.productInfo}>
@@ -121,13 +211,13 @@ export default function ProdutosScreen() {
       </View>
 
       <View style={styles.cardBody}>
-        <Text style={[styles.priceText, { color: theme.text }]}>{formatCurrency(item.price)}</Text>
+        <Text style={[styles.priceText, { color: theme.text }]}>{formatCurrency(item.price_sale)}</Text>
         <Text style={[
           styles.stockText,
           { color: theme.textSecondary },
           item.stock === 0 && styles.outOfStockText
         ]}>
-          Estoque: {item.stock > 0 ? item.stock : 'Esgotado'}
+          Estoque: {item.stock > 0 ? `${item.stock} ${item.unit_measure}` : 'Esgotado'}
         </Text>
       </View>
     </TouchableOpacity>
@@ -197,10 +287,40 @@ export default function ProdutosScreen() {
       {/* Add Button */}
       <TouchableOpacity
         style={[styles.addButton, { backgroundColor: theme.primary }]}
-        onPress={() => console.log('Adicionar novo produto')}
+        onPress={() => setCreateModalVisible(true)}
       >
         <Text style={[styles.addButtonText, { color: theme.buttonText }]}>+</Text>
       </TouchableOpacity>
+
+      {/* Modals */}
+      <CreateProductModal
+        visible={createModalVisible}
+        onClose={() => setCreateModalVisible(false)}
+        onSave={handleCreateProduct}
+      />
+
+      <EditProductModal
+        visible={editModalVisible}
+        product={selectedProduct}
+        onClose={() => setEditModalVisible(false)}
+        onSave={handleEditProduct}
+      />
+
+      <DeleteProductModal
+        visible={deleteModalVisible}
+        product={selectedProduct}
+        onClose={() => setDeleteModalVisible(false)}
+        onConfirm={handleDeleteProduct}
+      />
+
+      <ProductDetailsScreen
+        visible={detailsModalVisible}
+        product={selectedProduct}
+        onClose={() => setDetailsModalVisible(false)}
+        onEdit={openEdit}
+        onDelete={openDelete}
+        onToggleActive={handleToggleActive}
+      />
     </SafeAreaView>
   );
 }
