@@ -67,7 +67,7 @@ export default function ProductDetailsScreen({
           )}
 
           {/* Nome e Categoria */}
-          <View style={styles.section}>
+          <View style={[styles.section, { backgroundColor: theme.card }]}>
             <Text style={[styles.productName, { color: theme.text }]}>{product.name}</Text>
             <View style={[styles.categoryBadge, { backgroundColor: theme.primary }]}>
               <Text style={[styles.categoryText, { color: theme.buttonText }]}>{product.category}</Text>
@@ -81,14 +81,14 @@ export default function ProductDetailsScreen({
 
           {/* Descrição */}
           {product.description && (
-            <View style={styles.section}>
+            <View style={[styles.section, { backgroundColor: theme.card }]}>
               <Text style={[styles.sectionTitle, { color: theme.text }]}>Descrição</Text>
               <Text style={[styles.description, { color: theme.textSecondary }]}>{product.description}</Text>
             </View>
           )}
 
           {/* Informações de Preço */}
-          <View style={styles.section}>
+          <View style={[styles.section, { backgroundColor: theme.card }]}>
             <Text style={[styles.sectionTitle, { color: theme.text }]}>Preços</Text>
             <InfoRow label="Preço de Custo" value={formatCurrency(product.price_cost || 0)} />
             <InfoRow label="Preço de Venda" value={formatCurrency(product.price_sale)} />
@@ -98,7 +98,7 @@ export default function ProductDetailsScreen({
           </View>
 
           {/* Informações de Estoque */}
-          <View style={styles.section}>
+          <View style={[styles.section, { backgroundColor: theme.card }]}>
             <Text style={[styles.sectionTitle, { color: theme.text }]}>Estoque</Text>
             <InfoRow label="Estoque Atual" value={`${product.stock} ${product.unit_measure}`} />
             <InfoRow label="Unidade de Medida" value={product.unit_measure} />
@@ -112,7 +112,7 @@ export default function ProductDetailsScreen({
 
           {/* Informações de Peso */}
           {(product.net_weight || product.gross_weight) && (
-            <View style={styles.section}>
+            <View style={[styles.section, { backgroundColor: theme.card }]}>
               <Text style={[styles.sectionTitle, { color: theme.text }]}>Pesos</Text>
               {product.net_weight && (
                 <InfoRow label="Peso Líquido" value={`${product.net_weight} kg`} />
@@ -125,7 +125,7 @@ export default function ProductDetailsScreen({
 
           {/* Informações Fiscais */}
           {(product.ncm || product.cest) && (
-            <View style={styles.section}>
+            <View style={[styles.section, { backgroundColor: theme.card }]}>
               <Text style={[styles.sectionTitle, { color: theme.text }]}>Informações Fiscais</Text>
               {product.ncm && <InfoRow label="NCM" value={product.ncm} />}
               {product.cest && <InfoRow label="CEST" value={product.cest} />}
@@ -133,7 +133,7 @@ export default function ProductDetailsScreen({
           )}
 
           {/* Datas */}
-          <View style={styles.section}>
+          <View style={[styles.section, { backgroundColor: theme.card }]}>
             <Text style={[styles.sectionTitle, { color: theme.text }]}>Informações do Sistema</Text>
             {product.created_at && (
               <InfoRow
@@ -214,6 +214,8 @@ const styles = StyleSheet.create({
   },
   section: {
     padding: 16,
+    marginBottom: 8,
+    borderRadius: 8,
   },
   productName: {
     fontSize: 24,
