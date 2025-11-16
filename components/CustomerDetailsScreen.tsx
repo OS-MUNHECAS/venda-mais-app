@@ -1,15 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-    View,
-    Text,
-    ScrollView,
-    TouchableOpacity,
-    Alert,
     ActivityIndicator,
+    Alert,
     Linking,
+    ScrollView,
     Share,
+    Text,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import { Customer } from '../app/(tabs)/types/customer';
+import { useTheme } from '../contexts/ThemeContext';
 import { CustomerService } from '../services/customer.service';
 
 interface Props {
@@ -20,6 +21,7 @@ interface Props {
 }
 
 export default function CustomerDetailsScreen({ customerId, onEdit, onDelete, onClose }: Props) {
+    const { theme } = useTheme();
     const [customer, setCustomer] = useState<Customer | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -95,29 +97,29 @@ ${customer.addresses.map(address =>
 
     if (loading) {
         return (
-            <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#2196F3" />
-                <Text style={styles.loadingText}>Carregando dados...</Text>
+            <View style={[styles.loadingContainer, { backgroundColor: theme.background }]}>
+                <ActivityIndicator size="large" color={theme.primary} />
+                <Text style={[styles.loadingText, { color: theme.textSecondary }]}>Carregando dados...</Text>
             </View>
         );
     }
 
     if (!customer) {
         return (
-            <View style={styles.errorContainer}>
-                <Text style={styles.errorText}>Cliente não encontrado</Text>
-                <TouchableOpacity onPress={onClose} style={styles.backButton}>
-                    <Text style={styles.backButtonText}>Voltar</Text>
+            <View style={[styles.errorContainer, { backgroundColor: theme.background }]}>
+                <Text style={[styles.errorText, { color: theme.error }]}>Cliente não encontrado</Text>
+                <TouchableOpacity onPress={onClose} style={[styles.backButton, { backgroundColor: theme.primary }]}>
+                    <Text style={[styles.backButtonText, { color: theme.buttonText }]}>Voltar</Text>
                 </TouchableOpacity>
             </View>
         );
     }
 
     return (
-        <View style={styles.container}>
-            <View style={styles.header}>
+        <View style={[styles.container, { backgroundColor: theme.background }]}>
+            <View style={[styles.header, { backgroundColor: theme.card, borderBottomColor: theme.border }]}>
                 <TouchableOpacity onPress={onClose} style={styles.backButton}>
-                    <Text style={styles.backButtonText}>← Voltar</Text>
+                    <Text style={[styles.backButtonText, { color: theme.primary }]}>← Voltar</Text>
                 </TouchableOpacity>
                 <View style={styles.headerActions}>
                     <TouchableOpacity onPress={handleShare} style={styles.actionButton}>
@@ -134,10 +136,10 @@ ${customer.addresses.map(address =>
 
             <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
                 {/* Informações Principais */}
-                <View style={styles.section}>
+                <View style={[styles.section, { backgroundColor: theme.card }]}>
                     <View style={styles.customerHeader}>
                         <View style={styles.customerInfo}>
-                            <Text style={styles.customerName}>{customer.person.name}</Text>
+                            <Text style={[styles.customerName, { color: theme.text }]}>{customer.person.name}</Text>
                             <View style={styles.badgeContainer}>
                                 <View style={[
                                     styles.badge,
@@ -160,65 +162,65 @@ ${customer.addresses.map(address =>
                     </View>
 
                     <View style={styles.infoRow}>
-                        <Text style={styles.label}>
+                        <Text style={[styles.label, { color: theme.textSecondary }]}>
                             {customer.person.person_type === 'F' ? 'CPF' : 'CNPJ'}:
                         </Text>
-                        <Text style={styles.value}>{customer.person.cpf_cnpj}</Text>
+                        <Text style={[styles.value, { color: theme.text }]}>{customer.person.cpf_cnpj}</Text>
                     </View>
 
                     <View style={styles.infoRow}>
-                        <Text style={styles.label}>Última compra:</Text>
-                        <Text style={styles.value}>{formatDate(customer.last_purchase)}</Text>
+                        <Text style={[styles.label, { color: theme.textSecondary }]}>Última compra:</Text>
+                        <Text style={[styles.value, { color: theme.text }]}>{formatDate(customer.last_purchase)}</Text>
                     </View>
 
                     <View style={styles.infoRow}>
-                        <Text style={styles.label}>Cliente desde:</Text>
-                        <Text style={styles.value}>{formatDateTime(customer.created_at)}</Text>
+                        <Text style={[styles.label, { color: theme.textSecondary }]}>Cliente desde:</Text>
+                        <Text style={[styles.value, { color: theme.text }]}>{formatDateTime(customer.created_at)}</Text>
                     </View>
 
                     {customer.observations && (
                         <View style={styles.observationsContainer}>
-                            <Text style={styles.label}>Observações:</Text>
-                            <Text style={styles.observations}>{customer.observations}</Text>
+                            <Text style={[styles.label, { color: theme.textSecondary }]}>Observações:</Text>
+                            <Text style={[styles.observations, { color: theme.text }]}>{customer.observations}</Text>
                         </View>
                     )}
                 </View>
 
                 {/* Contatos */}
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Contatos</Text>
+                <View style={[styles.section, { backgroundColor: theme.card }]}>
+                    <Text style={[styles.sectionTitle, { color: theme.text }]}>Contatos</Text>
                     {customer.contacts.length > 0 ? (
                         customer.contacts.map((contact, index) => (
-                            <View key={index} style={styles.contactItem}>
+                            <View key={index} style={[styles.contactItem, { borderBottomColor: theme.border, backgroundColor: theme.inputBackground }]}>
                                 <View style={styles.contactInfo}>
-                                    <Text style={styles.contactType}>
+                                    <Text style={[styles.contactType, { color: theme.textSecondary }]}>
                                         {contact.contact_type === 'E' ? '📧 Email' :
                                             contact.contact_type === 'T' ? '📞 Telefone' : '💬 WhatsApp'}
                                     </Text>
-                                    <Text style={styles.contactValue}>{contact.value}</Text>
+                                    <Text style={[styles.contactValue, { color: theme.text }]}>{contact.value}</Text>
                                 </View>
                                 <View style={styles.contactActions}>
                                     {contact.contact_type === 'E' && (
                                         <TouchableOpacity
                                             onPress={() => handleEmail(contact.value)}
-                                            style={styles.contactButton}
+                                            style={[styles.contactButton, { backgroundColor: theme.primary }]}
                                         >
-                                            <Text style={styles.contactButtonText}>Email</Text>
+                                            <Text style={[styles.contactButtonText, { color: theme.buttonText }]}>Email</Text>
                                         </TouchableOpacity>
                                     )}
                                     {(contact.contact_type === 'T' || contact.contact_type === 'W') && (
                                         <>
                                             <TouchableOpacity
                                                 onPress={() => handleCall(contact.value)}
-                                                style={styles.contactButton}
+                                                style={[styles.contactButton, { backgroundColor: theme.primary }]}
                                             >
-                                                <Text style={styles.contactButtonText}>Ligar</Text>
+                                                <Text style={[styles.contactButtonText, { color: theme.buttonText }]}>Ligar</Text>
                                             </TouchableOpacity>
                                             <TouchableOpacity
                                                 onPress={() => handleWhatsApp(contact.value)}
-                                                style={[styles.contactButton, styles.whatsappButton]}
+                                                style={[styles.contactButton, { backgroundColor: '#25D366' }]}
                                             >
-                                                <Text style={[styles.contactButtonText, styles.whatsappButtonText]}>WhatsApp</Text>
+                                                <Text style={[styles.contactButtonText, { color: '#FFFFFF' }]}>WhatsApp</Text>
                                             </TouchableOpacity>
                                         </>
                                     )}
@@ -226,63 +228,63 @@ ${customer.addresses.map(address =>
                             </View>
                         ))
                     ) : (
-                        <Text style={styles.emptyText}>Nenhum contato cadastrado</Text>
+                        <Text style={[styles.emptyText, { color: theme.textSecondary }]}>Nenhum contato cadastrado</Text>
                     )}
                 </View>
 
                 {/* Endereços */}
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Endereços</Text>
+                <View style={[styles.section, { backgroundColor: theme.card }]}>
+                    <Text style={[styles.sectionTitle, { color: theme.text }]}>Endereços</Text>
                     {customer.addresses.length > 0 ? (
                         customer.addresses.map((address, index) => (
-                            <View key={index} style={styles.addressItem}>
+                            <View key={index} style={[styles.addressItem, { borderBottomColor: theme.border }]}>
                                 <View style={styles.addressHeader}>
-                                    <Text style={styles.addressType}>
+                                    <Text style={[styles.addressType, { color: theme.textSecondary }]}>
                                         {address.type === 'R' ? '🏠 Residencial' :
                                             address.type === 'C' ? '🏢 Comercial' : '📦 Entrega'}
                                         {address.is_main && ' (Principal)'}
                                     </Text>
                                 </View>
-                                <Text style={styles.addressText}>
+                                <Text style={[styles.addressText, { color: theme.text }]}>
                                     {address.street}
                                     {address.number && `, ${address.number}`}
                                 </Text>
                                 {address.complement && (
-                                    <Text style={styles.addressText}>{address.complement}</Text>
+                                    <Text style={[styles.addressText, { color: theme.text }]}>{address.complement}</Text>
                                 )}
-                                <Text style={styles.addressText}>
+                                <Text style={[styles.addressText, { color: theme.text }]}>
                                     {address.neighborhood} - {address.city.name}/{address.city.state.acronym}
                                 </Text>
-                                <Text style={styles.addressText}>CEP: {address.cep}</Text>
+                                <Text style={[styles.addressText, { color: theme.text }]}>CEP: {address.cep}</Text>
                                 {address.reference && (
-                                    <Text style={styles.addressReference}>
+                                    <Text style={[styles.addressReference, { color: theme.textSecondary }]}>
                                         Referência: {address.reference}
                                     </Text>
                                 )}
                             </View>
                         ))
                     ) : (
-                        <Text style={styles.emptyText}>Nenhum endereço cadastrado</Text>
+                        <Text style={[styles.emptyText, { color: theme.textSecondary }]}>Nenhum endereço cadastrado</Text>
                     )}
                 </View>
 
                 {/* Estatísticas */}
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Estatísticas</Text>
+                <View style={[styles.section, { backgroundColor: theme.card }]}>
+                    <Text style={[styles.sectionTitle, { color: theme.text }]}>Estatísticas</Text>
                     <View style={styles.statsGrid}>
-                        <View style={styles.statItem}>
-                            <Text style={styles.statValue}>{customer.contacts.length}</Text>
-                            <Text style={styles.statLabel}>Contatos</Text>
+                        <View style={[styles.statItem, { backgroundColor: theme.background }]}>
+                            <Text style={[styles.statValue, { color: theme.primary }]}>{customer.contacts.length}</Text>
+                            <Text style={[styles.statLabel, { color: theme.textSecondary }]}>Contatos</Text>
                         </View>
-                        <View style={styles.statItem}>
-                            <Text style={styles.statValue}>{customer.addresses.length}</Text>
-                            <Text style={styles.statLabel}>Endereços</Text>
+                        <View style={[styles.statItem, { backgroundColor: theme.background }]}>
+                            <Text style={[styles.statValue, { color: theme.primary }]}>{customer.addresses.length}</Text>
+                            <Text style={[styles.statLabel, { color: theme.textSecondary }]}>Endereços</Text>
                         </View>
-                        <View style={styles.statItem}>
-                            <Text style={styles.statValue}>
+                        <View style={[styles.statItem, { backgroundColor: theme.background }]}>
+                            <Text style={[styles.statValue, { color: theme.primary }]}>
                                 {customer.last_purchase ? '1+' : '0'}
                             </Text>
-                            <Text style={styles.statLabel}>Compras</Text>
+                            <Text style={[styles.statLabel, { color: theme.textSecondary }]}>Compras</Text>
                         </View>
                     </View>
                 </View>

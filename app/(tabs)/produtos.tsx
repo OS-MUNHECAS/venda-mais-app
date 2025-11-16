@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import {
-  FlatList,
-  SafeAreaView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  useWindowDimensions,
-  View
+    FlatList,
+    SafeAreaView,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    useWindowDimensions,
+    View
 } from 'react-native';
+import { useTheme } from '../../contexts/ThemeContext';
 import { FilterType, Product } from './types/product';
 
 // simulando dados
@@ -57,6 +58,7 @@ const mockProducts: Product[] = [
 ];
 
 export default function ProdutosScreen() {
+  const { theme } = useTheme();
   const [products] = useState<Product[]>(mockProducts);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>(mockProducts);
   const [searchText, setSearchText] = useState<string>('');
@@ -97,6 +99,7 @@ export default function ProdutosScreen() {
     <TouchableOpacity
       style={[
         styles.productCard,
+        { backgroundColor: theme.card },
         !item.active && styles.inactiveCard,
         isTablet && styles.tabletCard
       ]}
@@ -104,7 +107,7 @@ export default function ProdutosScreen() {
     >
       <View style={styles.cardHeader}>
         <View style={styles.productInfo}>
-          <Text style={styles.productName}>{item.name}</Text>
+          <Text style={[styles.productName, { color: theme.text }]}>{item.name}</Text>
           <View style={styles.categoryContainer}>
             <Text style={styles.categoryTag}>
               {item.category}
@@ -118,9 +121,10 @@ export default function ProdutosScreen() {
       </View>
 
       <View style={styles.cardBody}>
-        <Text style={styles.priceText}>{formatCurrency(item.price)}</Text>
+        <Text style={[styles.priceText, { color: theme.text }]}>{formatCurrency(item.price)}</Text>
         <Text style={[
           styles.stockText,
+          { color: theme.textSecondary },
           item.stock === 0 && styles.outOfStockText
         ]}>
           Estoque: {item.stock > 0 ? item.stock : 'Esgotado'}
@@ -130,22 +134,22 @@ export default function ProdutosScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#4CAF50" />
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+      <StatusBar barStyle="light-content" backgroundColor={theme.primary} />
 
       {/* Search Bar */}
-      <View style={styles.searchContainer}>
+      <View style={[styles.searchContainer, { backgroundColor: theme.card }]}>
         <TextInput
-          style={styles.searchInput}
+          style={[styles.searchInput, { backgroundColor: theme.background, borderColor: theme.border, color: theme.text }]}
           placeholder="Buscar por nome ou categoria..."
           value={searchText}
           onChangeText={setSearchText}
-          placeholderTextColor="#999"
+          placeholderTextColor={theme.textSecondary}
         />
       </View>
 
       {/* Filter Buttons */}
-      <View style={styles.filterContainer}>
+      <View style={[styles.filterContainer, { backgroundColor: theme.card }]}>
         {([
           { key: 'all' as FilterType, label: 'Todos', count: products.length },
           { key: 'active' as FilterType, label: 'Ativos', count: products.filter(p => p.active).length },
@@ -155,13 +159,15 @@ export default function ProdutosScreen() {
             key={filter.key}
             style={[
               styles.filterButton,
-              filterActive === filter.key && styles.activeFilterButton
+              { backgroundColor: theme.background },
+              filterActive === filter.key && { backgroundColor: theme.primary }
             ]}
             onPress={() => setFilterActive(filter.key)}
           >
             <Text style={[
               styles.filterButtonText,
-              filterActive === filter.key && styles.activeFilterButtonText
+              { color: theme.textSecondary },
+              filterActive === filter.key && { color: theme.buttonText }
             ]}>
               {filter.label} ({filter.count})
             </Text>
@@ -180,8 +186,8 @@ export default function ProdutosScreen() {
         key={isTablet ? 'tablet' : 'phone'}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>Nenhum produto encontrado</Text>
-            <Text style={styles.emptySubtext}>
+            <Text style={[styles.emptyText, { color: theme.textSecondary }]}>Nenhum produto encontrado</Text>
+            <Text style={[styles.emptySubtext, { color: theme.textSecondary }]}>
               Tente ajustar os filtros ou termo de busca
             </Text>
           </View>
@@ -190,10 +196,10 @@ export default function ProdutosScreen() {
 
       {/* Add Button */}
       <TouchableOpacity
-        style={styles.addButton}
+        style={[styles.addButton, { backgroundColor: theme.primary }]}
         onPress={() => console.log('Adicionar novo produto')}
       >
-        <Text style={styles.addButtonText}>+</Text>
+        <Text style={[styles.addButtonText, { color: theme.buttonText }]}>+</Text>
       </TouchableOpacity>
     </SafeAreaView>
   );
@@ -202,11 +208,9 @@ export default function ProdutosScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
   },
   searchContainer: {
     padding: 16,
-    backgroundColor: 'white',
     elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -214,45 +218,35 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   searchInput: {
-    backgroundColor: '#f8f8f8',
     borderRadius: 12,
     padding: 12,
     fontSize: 16,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
   },
   filterContainer: {
     flexDirection: 'row',
     padding: 16,
     paddingTop: 8,
-    backgroundColor: 'white',
     gap: 8,
   },
   filterButton: {
     flex: 1,
-    backgroundColor: '#f0f0f0',
     paddingVertical: 10,
     paddingHorizontal: 12,
     borderRadius: 8,
     alignItems: 'center',
   },
-  activeFilterButton: {
-    backgroundColor: '#4CAF50',
-  },
+  activeFilterButton: {},
   filterButtonText: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#666',
   },
-  activeFilterButtonText: {
-    color: 'white',
-  },
+  activeFilterButtonText: {},
   listContainer: {
     padding: 16,
     paddingTop: 8,
   },
   productCard: {
-    backgroundColor: 'white',
     borderRadius: 12,
     marginBottom: 12,
     elevation: 3,
@@ -284,7 +278,6 @@ const styles = StyleSheet.create({
   productName: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
     marginBottom: 8,
   },
   categoryContainer: {
@@ -319,12 +312,10 @@ const styles = StyleSheet.create({
   priceText: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#333',
     marginBottom: 6,
   },
   stockText: {
     fontSize: 14,
-    color: '#666',
   },
   outOfStockText: {
     color: '#d32f2f',
@@ -339,19 +330,16 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 18,
     fontWeight: '500',
-    color: '#666',
     marginBottom: 8,
   },
   emptySubtext: {
     fontSize: 14,
-    color: '#999',
     textAlign: 'center',
   },
   addButton: {
     position: 'absolute',
     bottom: 24,
     right: 24,
-    backgroundColor: '#4CAF50',
     width: 56,
     height: 56,
     borderRadius: 28,
@@ -366,6 +354,5 @@ const styles = StyleSheet.create({
   addButtonText: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: 'white',
   },
 });

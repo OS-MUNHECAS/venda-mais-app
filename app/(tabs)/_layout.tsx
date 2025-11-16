@@ -1,24 +1,35 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
+import { TouchableOpacity } from 'react-native';
+import { useDrawer } from '../../contexts/DrawerContext';
+import { useTheme } from '../../contexts/ThemeContext';
 
 export default function TabsLayout() {
+  const { theme } = useTheme();
+  const { openDrawer } = useDrawer();
+  
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#2196F3',
-        tabBarInactiveTintColor: '#757575',
+        tabBarActiveTintColor: theme.tabIconSelected,
+        tabBarInactiveTintColor: theme.tabIconDefault,
         tabBarStyle: {
-          backgroundColor: '#ffffff',
+          backgroundColor: theme.tabBackground,
           borderTopWidth: 1,
-          borderTopColor: '#e0e0e0',
+          borderTopColor: theme.border,
         },
         headerStyle: {
-          backgroundColor: '#2196F3',
+          backgroundColor: theme.primary,
         },
-        headerTintColor: '#ffffff',
+        headerTintColor: theme.buttonText,
         headerTitleStyle: {
           fontWeight: 'bold',
         },
+        headerRight: () => (
+          <TouchableOpacity onPress={openDrawer} style={{ marginRight: 15 }}>
+            <Ionicons name="menu" size={28} color={theme.buttonText} />
+          </TouchableOpacity>
+        ),
       }}
     >
       <Tabs.Screen
@@ -64,6 +75,42 @@ export default function TabsLayout() {
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="time-outline" size={size} color={color} />
           ),
+        }}
+      />
+      <Tabs.Screen
+        name="configuracoes"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="sobre"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="ajuda"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="types/customer"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="types/product"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="types/order"
+        options={{
+          href: null,
         }}
       />
     </Tabs>
