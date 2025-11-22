@@ -1,22 +1,23 @@
-import * as ImagePicker from 'expo-image-picker';
 import React, { useState } from 'react';
 import {
-    Alert,
-    Image,
-    Modal,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  Modal,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
+import { ProductFormData } from '../app/(tabs)/types/product';
 import { useTheme } from '../contexts/ThemeContext';
+import { ProductService } from '../services/product.service';
+import PhotoSelector from './PhotoSelector';
 
 interface CreateProductModalProps {
   visible: boolean;
   onClose: () => void;
-  onSave: (product: any) => void;
+  onSuccess: () => void;
 }
 
 const categories = [
@@ -33,9 +34,11 @@ const categories = [
 
 const unitMeasures = ['UN', 'KG', 'LT', 'MT', 'CX', 'PCT'];
 
-export default function CreateProductModal({ visible, onClose, onSave }: CreateProductModalProps) {
+export default function CreateProductModal({ visible, onClose, onSuccess }: CreateProductModalProps) {
   const { theme } = useTheme();
-  
+  const [loading, setLoading] = useState(false);
+  const [photoUri, setPhotoUri] = useState('');
+
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
@@ -50,7 +53,6 @@ export default function CreateProductModal({ visible, onClose, onSave }: CreateP
   const [ncm, setNcm] = useState('');
   const [cest, setCest] = useState('');
   const [defaultDiscount, setDefaultDiscount] = useState('');
-  const [photoUrl, setPhotoUrl] = useState('');
 
   const resetForm = () => {
     setName('');
@@ -67,69 +69,64 @@ export default function CreateProductModal({ visible, onClose, onSave }: CreateP
     setNcm('');
     setCest('');
     setDefaultDiscount('');
-    setPhotoUrl('');
+    setPhotoUri('');
   };
 
-  const handlePickImage = async () => {
-    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    
-    if (permissionResult.granted === false) {
-      Alert.alert('Permissão necessária', 'É necessário permitir acesso à galeria de fotos');
-      return;
+  const handleSave = async () => {
+    try {
+      setLoading(true);
+
+      if (!name.trim()) {
+        Alert.alert('Atenção', 'O nome do produto é obrigatório.');
+        return;
+      }
+
+      if (!category) {
+        Alert.alert('Atenção', 'A categoria é obrigatória.');
+        return;
+      }
+
+      if (!priceSale) {
+        Alert.alert('Atenção', 'O preço de venda é obrigatório.');
+        return;
+      }
+
+      const productData: ProductFormData = {
+        name: name.trim(),
+        description: description.trim() || undefined,
+        category,
+        price_cost: parseFloat(priceCost) || 0,
+        price_sale: parseFloat(priceSale),
+        stock: parseFloat(stock) || 0,
+        net_weight: netWeight ? parseFloat(netWeight) : undefined,
+        gross_weight: grossWeight ? parseFloat(grossWeight) : undefined,
+        min_stock: minStock ? parseFloat(minStock) : undefined,
+        max_stock: maxStock ? parseFloat(maxStock) : undefined,
+        unit_measure: unitMeasure,
+        ncm: ncm.trim() || undefined,
+        cest: cest.trim() || undefined,
+        default_discount: defaultDiscount ? parseFloat(defaultDiscount) : undefined,
+        photo_url: photoUri || undefined,
+        active: true,
+      };
+
+      await ProductService.create(productData);
+
+      Alert.alert('Produto Cadastrado', 'O produto foi cadastrado com sucesso.', [
+        {
+          text: 'Continuar',
+          onPress: () => {
+            resetForm();
+            onSuccess();
+            onClose();
+          }
+        }
+      ]);
+    } catch (error) {
+      Alert.alert('Erro no Cadastro', error instanceof Error ? error.message : 'Não foi possível cadastrar o produto.');
+    } finally {
+      setLoading(false);
     }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.8,
-    });
-
-    if (!result.canceled) {
-      setPhotoUrl(result.assets[0].uri);
-    }
-  };
-
-  const handleSave = () => {
-    if (!name.trim()) {
-      Alert.alert('Erro', 'O nome do produto é obrigatório');
-      return;
-    }
-
-    if (!category) {
-      Alert.alert('Erro', 'A categoria é obrigatória');
-      return;
-    }
-
-    if (!priceSale) {
-      Alert.alert('Erro', 'O preço de venda é obrigatório');
-      return;
-    }
-
-    const newProduct = {
-      id_product: Date.now(),
-      name: name.trim(),
-      description: description.trim() || undefined,
-      category,
-      price_cost: parseFloat(priceCost) || 0,
-      price_sale: parseFloat(priceSale),
-      stock: parseFloat(stock) || 0,
-      net_weight: netWeight ? parseFloat(netWeight) : undefined,
-      gross_weight: grossWeight ? parseFloat(grossWeight) : undefined,
-      min_stock: minStock ? parseFloat(minStock) : undefined,
-      max_stock: maxStock ? parseFloat(maxStock) : undefined,
-      unit_measure: unitMeasure,
-      ncm: ncm.trim() || undefined,
-      cest: cest.trim() || undefined,
-      default_discount: defaultDiscount ? parseFloat(defaultDiscount) : undefined,
-      photo_url: photoUrl || undefined,
-      active: true,
-      created_at: new Date().toISOString(),
-    };
-
-    onSave(newProduct);
-    resetForm();
-    onClose();
   };
 
   const handleClose = () => {
@@ -148,19 +145,12 @@ export default function CreateProductModal({ visible, onClose, onSave }: CreateP
         </View>
 
         <ScrollView style={styles.content}>
-          {/* Foto do Produto */}
           <View style={styles.photoSection}>
-            <TouchableOpacity onPress={handlePickImage} style={[styles.photoButton, { borderColor: theme.border }]}>
-              {photoUrl ? (
-                <Image source={{ uri: photoUrl }} style={styles.photo} />
-              ) : (
-                <View style={[styles.photoPlaceholder, { backgroundColor: theme.inputBackground }]}>
-                  <Text style={[styles.photoPlaceholderText, { color: theme.textSecondary }]}>
-                    📷 {'\n'} Adicionar Foto
-                  </Text>
-                </View>
-              )}
-            </TouchableOpacity>
+            <PhotoSelector
+              photoUri={photoUri}
+              onPhotoSelected={setPhotoUri}
+              onPhotoRemoved={() => setPhotoUri('')}
+            />
           </View>
 
           {/* Nome do Produto */}
@@ -385,14 +375,18 @@ export default function CreateProductModal({ visible, onClose, onSave }: CreateP
           <TouchableOpacity
             style={[styles.cancelButton, { backgroundColor: theme.buttonSecondary, borderColor: theme.border }]}
             onPress={handleClose}
+            disabled={loading}
           >
-            <Text style={[styles.buttonText, { color: theme.background }]}>Cancelar</Text>
+            <Text style={[styles.buttonText, { color: theme.text }]}>Cancelar</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.saveButton, { backgroundColor: theme.primary }]}
+            style={[styles.saveButton, { backgroundColor: '#3B82F6' }]}
             onPress={handleSave}
+            disabled={loading}
           >
-            <Text style={[styles.buttonText, { color: theme.buttonText }]}>Salvar</Text>
+            <Text style={[styles.buttonText, { color: '#FFFFFF' }]}>
+              {loading ? 'Salvando...' : 'Cadastrar'}
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -425,28 +419,7 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   photoSection: {
-    alignItems: 'center',
     marginBottom: 24,
-  },
-  photoButton: {
-    borderWidth: 2,
-    borderRadius: 8,
-    borderStyle: 'dashed',
-    overflow: 'hidden',
-  },
-  photo: {
-    width: 150,
-    height: 150,
-  },
-  photoPlaceholder: {
-    width: 150,
-    height: 150,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  photoPlaceholderText: {
-    fontSize: 14,
-    textAlign: 'center',
   },
   inputGroup: {
     marginBottom: 16,
