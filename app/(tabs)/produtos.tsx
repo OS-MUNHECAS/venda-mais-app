@@ -1,66 +1,108 @@
 import React, { useEffect, useState } from 'react';
 import {
-  FlatList,
-  SafeAreaView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  useWindowDimensions,
-  View
+    Alert,
+    FlatList,
+    SafeAreaView,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    useWindowDimensions,
+    View
 } from 'react-native';
+import CreateProductModal from '../../components/CreateProductModal';
+import DeleteProductModal from '../../components/DeleteProductModal';
+import EditProductModal from '../../components/EditProductModal';
+import ProductDetailsScreen from '../../components/ProductDetailsScreen';
+import { useTheme } from '../../contexts/ThemeContext';
 import { FilterType, Product } from './types/product';
 
-// simulando dados
+// simulando dados com novo formato
 const mockProducts: Product[] = [
   {
     id_product: 1,
     name: "Café Torrado Premium",
-    price: 45.90,
+    description: "Café especial 100% arábica torrado em pequenos lotes",
+    category: "Grãos",
+    price_cost: 30.00,
+    price_sale: 45.90,
     stock: 150,
+    net_weight: 0.5,
+    gross_weight: 0.6,
+    min_stock: 20,
+    max_stock: 300,
+    unit_measure: "KG",
+    ncm: "09011190",
+    cest: "1700100",
+    default_discount: 5,
     active: true,
-    category: "Grãos"
+    created_at: new Date().toISOString(),
   },
   {
     id_product: 2,
     name: "Azeite Extra Virgem",
-    price: 28.50,
+    description: "Azeite português de primeira prensagem a frio",
+    category: "Mercearia",
+    price_cost: 18.00,
+    price_sale: 28.50,
     stock: 80,
+    net_weight: 0.5,
+    gross_weight: 0.8,
+    unit_measure: "LT",
     active: true,
-    category: "Mercearia"
+    created_at: new Date().toISOString(),
   },
   {
     id_product: 3,
     name: "Queijo Minas Padrão",
-    price: 62.00,
+    category: "Laticínios",
+    price_cost: 45.00,
+    price_sale: 62.00,
     stock: 0,
+    unit_measure: "KG",
     active: false,
-    category: "Laticínios"
+    created_at: new Date().toISOString(),
   },
   {
     id_product: 4,
     name: "Doce de Leite Artesanal",
-    price: 22.00,
+    category: "Doces",
+    price_cost: 12.00,
+    price_sale: 22.00,
     stock: 120,
+    unit_measure: "KG",
     active: true,
-    category: "Doces"
+    created_at: new Date().toISOString(),
   },
   {
     id_product: 5,
     name: "Cachaça Envelhecida",
-    price: 89.90,
+    description: "Cachaça envelhecida em barris de carvalho por 3 anos",
+    category: "Bebidas",
+    price_cost: 60.00,
+    price_sale: 89.90,
     stock: 40,
+    unit_measure: "LT",
+    ncm: "22089000",
     active: false,
-    category: "Bebidas"
+    created_at: new Date().toISOString(),
   }
 ];
 
 export default function ProdutosScreen() {
-  const [products] = useState<Product[]>(mockProducts);
+  const { theme } = useTheme();
+  const [products, setProducts] = useState<Product[]>(mockProducts);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>(mockProducts);
   const [searchText, setSearchText] = useState<string>('');
   const [filterActive, setFilterActive] = useState<FilterType>('all');
+
+  // Estados dos modais
+  const [createModalVisible, setCreateModalVisible] = useState(false);
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [detailsModalVisible, setDetailsModalVisible] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
@@ -92,19 +134,70 @@ export default function ProdutosScreen() {
     return `R$ ${value.toFixed(2).replace('.', ',')}`;
   };
 
+  // Funções CRUD
+  const handleCreateProduct = (newProduct: Product) => {
+    setProducts([...products, newProduct]);
+    Alert.alert('Sucesso', 'Produto criado com sucesso!');
+  };
+
+  const handleEditProduct = (updatedProduct: Product) => {
+    setProducts(products.map(p => 
+      p.id_product === updatedProduct.id_product ? updatedProduct : p
+    ));
+    setEditModalVisible(false);
+    setDetailsModalVisible(false);
+    Alert.alert('Sucesso', 'Produto atualizado com sucesso!');
+  };
+
+  const handleDeleteProduct = () => {
+    if (selectedProduct) {
+      setProducts(products.filter(p => p.id_product !== selectedProduct.id_product));
+      setDeleteModalVisible(false);
+      setDetailsModalVisible(false);
+      Alert.alert('Sucesso', 'Produto excluído com sucesso!');
+    }
+  };
+
+  const handleToggleActive = () => {
+    if (selectedProduct) {
+      const updatedProduct = { ...selectedProduct, active: !selectedProduct.active };
+      setProducts(products.map(p => 
+        p.id_product === updatedProduct.id_product ? updatedProduct : p
+      ));
+      setSelectedProduct(updatedProduct);
+      Alert.alert('Sucesso', `Produto ${updatedProduct.active ? 'ativado' : 'desativado'} com sucesso!`);
+    }
+  };
+
+  const openDetails = (product: Product) => {
+    setSelectedProduct(product);
+    setDetailsModalVisible(true);
+  };
+
+  const openEdit = () => {
+    setDetailsModalVisible(false);
+    setEditModalVisible(true);
+  };
+
+  const openDelete = () => {
+    setDetailsModalVisible(false);
+    setDeleteModalVisible(true);
+  };
+
   // Componente do Card do Produto
   const ProductCard = ({ item }: { item: Product }) => (
     <TouchableOpacity
       style={[
         styles.productCard,
+        { backgroundColor: theme.card },
         !item.active && styles.inactiveCard,
         isTablet && styles.tabletCard
       ]}
-      onPress={() => console.log('Produto selecionado:', item.id_product)}
+      onPress={() => openDetails(item)}
     >
       <View style={styles.cardHeader}>
         <View style={styles.productInfo}>
-          <Text style={styles.productName}>{item.name}</Text>
+          <Text style={[styles.productName, { color: theme.text }]}>{item.name}</Text>
           <View style={styles.categoryContainer}>
             <Text style={styles.categoryTag}>
               {item.category}
@@ -118,34 +211,35 @@ export default function ProdutosScreen() {
       </View>
 
       <View style={styles.cardBody}>
-        <Text style={styles.priceText}>{formatCurrency(item.price)}</Text>
+        <Text style={[styles.priceText, { color: theme.text }]}>{formatCurrency(item.price_sale)}</Text>
         <Text style={[
           styles.stockText,
+          { color: theme.textSecondary },
           item.stock === 0 && styles.outOfStockText
         ]}>
-          Estoque: {item.stock > 0 ? item.stock : 'Esgotado'}
+          Estoque: {item.stock > 0 ? `${item.stock} ${item.unit_measure}` : 'Esgotado'}
         </Text>
       </View>
     </TouchableOpacity>
   );
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#4CAF50" />
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+      <StatusBar barStyle="light-content" backgroundColor={theme.primary} />
 
       {/* Search Bar */}
-      <View style={styles.searchContainer}>
+      <View style={[styles.searchContainer, { backgroundColor: theme.card }]}>
         <TextInput
-          style={styles.searchInput}
+          style={[styles.searchInput, { backgroundColor: theme.background, borderColor: theme.border, color: theme.text }]}
           placeholder="Buscar por nome ou categoria..."
           value={searchText}
           onChangeText={setSearchText}
-          placeholderTextColor="#999"
+          placeholderTextColor={theme.textSecondary}
         />
       </View>
 
       {/* Filter Buttons */}
-      <View style={styles.filterContainer}>
+      <View style={[styles.filterContainer, { backgroundColor: theme.card }]}>
         {([
           { key: 'all' as FilterType, label: 'Todos', count: products.length },
           { key: 'active' as FilterType, label: 'Ativos', count: products.filter(p => p.active).length },
@@ -155,13 +249,15 @@ export default function ProdutosScreen() {
             key={filter.key}
             style={[
               styles.filterButton,
-              filterActive === filter.key && styles.activeFilterButton
+              { backgroundColor: theme.background },
+              filterActive === filter.key && { backgroundColor: theme.primary }
             ]}
             onPress={() => setFilterActive(filter.key)}
           >
             <Text style={[
               styles.filterButtonText,
-              filterActive === filter.key && styles.activeFilterButtonText
+              { color: theme.textSecondary },
+              filterActive === filter.key && { color: theme.buttonText }
             ]}>
               {filter.label} ({filter.count})
             </Text>
@@ -180,8 +276,8 @@ export default function ProdutosScreen() {
         key={isTablet ? 'tablet' : 'phone'}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>Nenhum produto encontrado</Text>
-            <Text style={styles.emptySubtext}>
+            <Text style={[styles.emptyText, { color: theme.textSecondary }]}>Nenhum produto encontrado</Text>
+            <Text style={[styles.emptySubtext, { color: theme.textSecondary }]}>
               Tente ajustar os filtros ou termo de busca
             </Text>
           </View>
@@ -190,11 +286,41 @@ export default function ProdutosScreen() {
 
       {/* Add Button */}
       <TouchableOpacity
-        style={styles.addButton}
-        onPress={() => console.log('Adicionar novo produto')}
+        style={[styles.addButton, { backgroundColor: theme.primary }]}
+        onPress={() => setCreateModalVisible(true)}
       >
-        <Text style={styles.addButtonText}>+</Text>
+        <Text style={[styles.addButtonText, { color: theme.buttonText }]}>+</Text>
       </TouchableOpacity>
+
+      {/* Modals */}
+      <CreateProductModal
+        visible={createModalVisible}
+        onClose={() => setCreateModalVisible(false)}
+        onSave={handleCreateProduct}
+      />
+
+      <EditProductModal
+        visible={editModalVisible}
+        product={selectedProduct}
+        onClose={() => setEditModalVisible(false)}
+        onSave={handleEditProduct}
+      />
+
+      <DeleteProductModal
+        visible={deleteModalVisible}
+        product={selectedProduct}
+        onClose={() => setDeleteModalVisible(false)}
+        onConfirm={handleDeleteProduct}
+      />
+
+      <ProductDetailsScreen
+        visible={detailsModalVisible}
+        product={selectedProduct}
+        onClose={() => setDetailsModalVisible(false)}
+        onEdit={openEdit}
+        onDelete={openDelete}
+        onToggleActive={handleToggleActive}
+      />
     </SafeAreaView>
   );
 }
@@ -202,11 +328,9 @@ export default function ProdutosScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
   },
   searchContainer: {
     padding: 16,
-    backgroundColor: 'white',
     elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -214,45 +338,35 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   searchInput: {
-    backgroundColor: '#f8f8f8',
     borderRadius: 12,
     padding: 12,
     fontSize: 16,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
   },
   filterContainer: {
     flexDirection: 'row',
     padding: 16,
     paddingTop: 8,
-    backgroundColor: 'white',
     gap: 8,
   },
   filterButton: {
     flex: 1,
-    backgroundColor: '#f0f0f0',
     paddingVertical: 10,
     paddingHorizontal: 12,
     borderRadius: 8,
     alignItems: 'center',
   },
-  activeFilterButton: {
-    backgroundColor: '#4CAF50',
-  },
+  activeFilterButton: {},
   filterButtonText: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#666',
   },
-  activeFilterButtonText: {
-    color: 'white',
-  },
+  activeFilterButtonText: {},
   listContainer: {
     padding: 16,
     paddingTop: 8,
   },
   productCard: {
-    backgroundColor: 'white',
     borderRadius: 12,
     marginBottom: 12,
     elevation: 3,
@@ -284,7 +398,6 @@ const styles = StyleSheet.create({
   productName: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
     marginBottom: 8,
   },
   categoryContainer: {
@@ -319,12 +432,10 @@ const styles = StyleSheet.create({
   priceText: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#333',
     marginBottom: 6,
   },
   stockText: {
     fontSize: 14,
-    color: '#666',
   },
   outOfStockText: {
     color: '#d32f2f',
@@ -339,19 +450,16 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 18,
     fontWeight: '500',
-    color: '#666',
     marginBottom: 8,
   },
   emptySubtext: {
     fontSize: 14,
-    color: '#999',
     textAlign: 'center',
   },
   addButton: {
     position: 'absolute',
     bottom: 24,
     right: 24,
-    backgroundColor: '#4CAF50',
     width: 56,
     height: 56,
     borderRadius: 28,
@@ -366,6 +474,5 @@ const styles = StyleSheet.create({
   addButtonText: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: 'white',
   },
 });

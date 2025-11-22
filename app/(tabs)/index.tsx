@@ -3,105 +3,175 @@ import { Link } from "expo-router";
 import React from "react";
 import {
   ScrollView,
-  StyleSheet,
   Text,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
+import { useTheme } from '../../contexts/ThemeContext';
 
 export default function HomeScreen() {
+  const { theme } = useTheme();
+  
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Bem-vindo ao Venda+</Text>
+    <View style={{ flex: 1, backgroundColor: theme.background }}>
+      <View style={{ backgroundColor: theme.primary, padding: 30, alignItems: "center" }}>
+        <Text style={{ fontSize: 28, fontWeight: "bold", color: theme.buttonText }}>
+          Bem-vindo ao Venda+
+        </Text>
       </View>
 
-      <View style={styles.optionsContainer}>
-        <Link href="/clientes" asChild>
-          <TouchableOpacity style={styles.optionCard}>
-            <Ionicons name="people" size={40} color="#2196F3" />
-            <Text style={styles.optionTitle}>Clientes</Text>
-            <Text style={styles.optionDescription}>Gerenciar clientes</Text>
-          </TouchableOpacity>
-        </Link>
+      <ScrollView style={{ flex: 1, padding: 20 }}>
+        <View style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" }}>
+          <Link href="/clientes" asChild style={{ width: "48%" }}>
+            <TouchableOpacity 
+              style={{
+                backgroundColor: theme.card,
+                borderColor: theme.border,
+                borderWidth: 1,
+                borderRadius: 12,
+                padding: 16,
+                marginBottom: 12,
+                alignItems: "center",
+                elevation: 2,
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.1,
+                shadowRadius: 3,
+              }}
+            >
+              <View style={{
+                width: 50,
+                height: 50,
+                borderRadius: 25,
+                backgroundColor: theme.primary + '20',
+                alignItems: "center",
+                justifyContent: "center",
+                marginBottom: 12,
+              }}>
+                <Ionicons name="people" size={28} color={theme.primary} />
+              </View>
+              <Text style={{ fontSize: 16, fontWeight: "700", color: theme.text, marginBottom: 4, textAlign: "center" }}>
+                Clientes
+              </Text>
+              <Text style={{ fontSize: 12, color: theme.textSecondary, textAlign: "center" }}>
+                Gerenciar clientes
+              </Text>
+            </TouchableOpacity>
+          </Link>
 
-        <Link href="/produtos" asChild>
-          <TouchableOpacity style={styles.optionCard}>
-            <Ionicons name="cube" size={40} color="#2196F3" />
-            <Text style={styles.optionTitle}>Produtos</Text>
-            <Text style={styles.optionDescription}>Gerenciar produtos</Text>
-          </TouchableOpacity>
-        </Link>
+          <Link href="/produtos" asChild style={{ width: "48%" }}>
+            <TouchableOpacity 
+              style={{
+                backgroundColor: theme.card,
+                borderColor: theme.border,
+                borderWidth: 1,
+                borderRadius: 12,
+                padding: 16,
+                marginBottom: 12,
+                alignItems: "center",
+                elevation: 2,
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.1,
+                shadowRadius: 3,
+              }}
+            >
+              <View style={{
+                width: 50,
+                height: 50,
+                borderRadius: 25,
+                backgroundColor: theme.primary + '20',
+                alignItems: "center",
+                justifyContent: "center",
+                marginBottom: 12,
+              }}>
+                <Ionicons name="cube" size={28} color={theme.primary} />
+              </View>
+              <Text style={{ fontSize: 16, fontWeight: "700", color: theme.text, marginBottom: 4, textAlign: "center" }}>
+                Produtos
+              </Text>
+              <Text style={{ fontSize: 12, color: theme.textSecondary, textAlign: "center" }}>
+                Gerenciar produtos
+              </Text>
+            </TouchableOpacity>
+          </Link>
 
-        <Link href="/pedidos" asChild>
-          <TouchableOpacity style={styles.optionCard}>
-            <Ionicons name="add-circle" size={40} color="#2196F3" />
-            <Text style={styles.optionTitle}>Nova Venda</Text>
-            <Text style={styles.optionDescription}>Criar novo pedido</Text>
-          </TouchableOpacity>
-        </Link>
+          <Link href="/pedidos" asChild style={{ width: "48%" }}>
+            <TouchableOpacity 
+              style={{
+                backgroundColor: theme.card,
+                borderColor: theme.border,
+                borderWidth: 1,
+                borderRadius: 12,
+                padding: 16,
+                marginBottom: 12,
+                alignItems: "center",
+                elevation: 2,
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.1,
+                shadowRadius: 3,
+              }}
+            >
+              <View style={{
+                width: 50,
+                height: 50,
+                borderRadius: 25,
+                backgroundColor: theme.primary + '20',
+                alignItems: "center",
+                justifyContent: "center",
+                marginBottom: 12,
+              }}>
+                <Ionicons name="add-circle" size={28} color={theme.primary} />
+              </View>
+              <Text style={{ fontSize: 16, fontWeight: "700", color: theme.text, marginBottom: 4, textAlign: "center" }}>
+                Nova Venda
+              </Text>
+              <Text style={{ fontSize: 12, color: theme.textSecondary, textAlign: "center" }}>
+                Criar novo pedido
+              </Text>
+            </TouchableOpacity>
+          </Link>
 
-        <Link href="/historico" asChild>
-          <TouchableOpacity style={styles.optionCard}>
-            <Ionicons name="time-outline" size={40} color="#2196F3" />
-            <Text style={styles.optionTitle}>Histórico</Text>
-            <Text style={styles.optionDescription}>Visualizar pedidos</Text>
-          </TouchableOpacity>
-        </Link>
-      </View>
-    </ScrollView>
+          <Link href="/historico" asChild style={{ width: "48%" }}>
+            <TouchableOpacity 
+              style={{
+                backgroundColor: theme.card,
+                borderColor: theme.border,
+                borderWidth: 1,
+                borderRadius: 12,
+                padding: 16,
+                marginBottom: 12,
+                alignItems: "center",
+                elevation: 2,
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.1,
+                shadowRadius: 3,
+              }}
+            >
+              <View style={{
+                width: 50,
+                height: 50,
+                borderRadius: 25,
+                backgroundColor: theme.primary + '20',
+                alignItems: "center",
+                justifyContent: "center",
+                marginBottom: 12,
+              }}>
+                <Ionicons name="time-outline" size={28} color={theme.primary} />
+              </View>
+              <Text style={{ fontSize: 16, fontWeight: "700", color: theme.text, marginBottom: 4, textAlign: "center" }}>
+                Histórico
+              </Text>
+              <Text style={{ fontSize: 12, color: theme.textSecondary, textAlign: "center" }}>
+                Visualizar pedidos
+              </Text>
+            </TouchableOpacity>
+          </Link>
+        </View>
+      </ScrollView>
+    </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f5f5f5",
-  },
-  header: {
-    backgroundColor: "#2196F3",
-    padding: 30,
-    alignItems: "center",
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: "#ffffff",
-    marginBottom: 5,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: "#ffffff",
-    opacity: 0.9,
-  },
-  optionsContainer: {
-    padding: 20,
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-  },
-  optionCard: {
-    backgroundColor: "#ffffff",
-    borderRadius: 10,
-    padding: 20,
-    width: "48%",
-    marginBottom: 15,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  optionTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginTop: 10,
-    marginBottom: 5,
-  },
-  optionDescription: {
-    fontSize: 12,
-    color: "#666",
-    textAlign: "center",
-  },
-});
