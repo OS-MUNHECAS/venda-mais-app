@@ -22,27 +22,68 @@ Ferramenta simples e eficiente para microempreendedores gerenciarem vendas, prod
 
 ## Funcionalidades
 
-### Implementadas
-- **Gestão de Clientes:** CRUD completo com busca e filtros
-- **Recursos Nativos:** Câmera e galeria para fotos de clientes
-- **Persistência Local:** Dados salvos no LocalStorage
-- **Interface Profissional:** Design limpo e responsivo
+### ✅ Implementadas
+- **Gestão de Clientes:** CRUD completo com busca, filtros e fotos
+- **Gestão de Produtos:** CRUD completo com validações e fotos
+- **Registro de Pedidos:** Sistema wizard em 4 etapas (Cliente → Produtos → Frete/Pagamento → Revisão)
+- **Histórico de Vendas:** Listagem e detalhamento de pedidos realizados
+- **Recursos Nativos:** Câmera e galeria (expo-image-picker)
+- **Integração API Externa:** Consulta de CEP via ViaCEP
+- **Persistência Local:** LocalStorage/AsyncStorage
+- **Sistema de Temas:** 3 temas (Claro, Escuro, Alto Contraste)
+- **Interface Profissional:** Design responsivo e acessível
 
-### Planejadas
-- **Gestão de Produtos:** CRUD completo de produtos
-- **Registro de Vendas:** Lançamento de vendas
-- **Relatórios:** Histórico e métricas de vendas
-- **Integração com API:** Consulta de CEP
+### 🎯 Funcionalidades Detalhadas
+
+#### Módulo de Clientes
+- Cadastro completo (Nome, CPF/CNPJ, Contatos, Endereços)
+- Busca automática de endereço por CEP
+- Múltiplos contatos (Email, Telefone, WhatsApp)
+- Foto do cliente (câmera ou galeria)
+- Soft delete e hard delete
+- Filtros: Todos, Ativos, Inativos
+
+#### Módulo de Produtos
+- Cadastro detalhado (Preço custo/venda, Estoque, Pesos, NCM/CEST)
+- Cálculo automático de margem de lucro
+- Foto do produto (câmera ou galeria)
+- Validações de campos obrigatórios
+- Soft delete e hard delete
+- Busca e filtros por categoria
+
+#### Módulo de Pedidos
+- **Etapa 1:** Seleção de cliente
+- **Etapa 2:** Adição de produtos e quantidades
+- **Etapa 3:** Configuração de frete (CIF/FOB/Retirada) e pagamento
+- **Etapa 4:** Revisão e confirmação
+- Cálculo automático de totais
+- Múltiplas formas de pagamento
+- Edição de pedidos existentes
+
+#### Módulo de Histórico
+- Listagem cronológica de pedidos
+- Detalhamento completo de cada pedido
+- Opções de editar e excluir
+- Status e valores exibidos
+
+### 🚧 Futuras Melhorias
+- Backend com API REST
+- Relatórios e gráficos de vendas
+- Exportação de dados (PDF, Excel)
+- Notificações push
+- Sincronização em nuvem
 
 ## Stack Tecnológica
 
 | Componente | Tecnologia | Versão |
 |:-----------|:-----------|:-------|
-| **Framework** | React Native + Expo | ~54.0.10 |
+| **Framework** | React Native + Expo | ~54.0.29 |
 | **Linguagem** | TypeScript | ~5.9.2 |
-| **Navegação** | Expo Router | ~6.0.8 |
-| **Recursos Nativos** | expo-image-picker | Latest |
-| **Persistência** | LocalStorage / Memory | Nativo |
+| **Navegação** | Expo Router | ~6.0.19 |
+| **Recursos Nativos** | expo-image-picker | ~17.0.10 |
+| **Persistência** | AsyncStorage | ~2.2.0 |
+| **Ícones** | @expo/vector-icons | ~15.0.3 |
+| **HTTP Client** | Fetch API (nativo) | - |
 
 ## Estrutura do Projeto
 
@@ -92,10 +133,15 @@ npx expo start --ios     # Executar no iOS (macOS)
 
 ## Status do Desenvolvimento
 
-- ✅ **Clientes** - CRUD completo com fotos
-- ⏳ **Produtos** - Em desenvolvimento
-- ⏳ **Pedidos** - Planejado
-- ⏳ **Histórico** - Planejado
+| Módulo | Status | Descrição |
+|:-------|:------:|:----------|
+| **Clientes** | ✅ Completo | CRUD completo com fotos e ViaCEP |
+| **Produtos** | ✅ Completo | CRUD completo com fotos e validações |
+| **Pedidos** | ✅ Completo | Sistema wizard com 4 etapas |
+| **Histórico** | ✅ Completo | Listagem e detalhamento de pedidos |
+| **Configurações** | ✅ Completo | Gerenciamento de 3 temas |
+| **Sobre** | ✅ Completo | Informações do app e equipe |
+| **Ajuda** | ✅ Completo | FAQ funcional |
 
 ## Contribuição
 
