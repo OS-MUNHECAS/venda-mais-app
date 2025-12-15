@@ -13,7 +13,8 @@ import {
 } from 'react-native';
 import { DateInput } from '../../components/DateInput';
 import { useTheme } from '../../contexts/ThemeContext';
-import { mockCustomers, mockProducts } from '../../database/mocks'; // Importando dados fictícios
+import { CustomerService } from '../../services/customer.service';
+import { ProductService } from '../../services/product.service';
 import { saveOrder, updateOrder } from '../../services/order-storage.service';
 import { Customer } from './types/customer';
 import { Order, OrderItem } from './types/order';
@@ -33,6 +34,33 @@ export default function PedidosScreen() {
     total_amount: 0,
   });
 
+  // Estados para clientes e produtos carregados dos services
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Carregar dados ao montar o componente
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      const [loadedCustomers, loadedProducts] = await Promise.all([
+        CustomerService.getAll(),
+        ProductService.getAll()
+      ]);
+      setCustomers(loadedCustomers);
+      setProducts(loadedProducts);
+    } catch (error) {
+      console.error('Erro ao carregar dados:', error);
+      Alert.alert('Erro', 'Não foi possível carregar clientes e produtos');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Se vier um pedido para editar, preenche o formulário
   useEffect(() => {
     if (route?.params?.orderToEdit) {
@@ -51,7 +79,15 @@ export default function PedidosScreen() {
     let newItems = [...(order.items || [])];
 
     if (quantity > 0) {
-      const newItem: OrderItem = { product, quantity, total_price: product.price * quantity };
+      const newItem: OrderItem = {
+        id_item: Date.now(),
+        product,
+        quantity,
+        unit_price: product.price_sale,
+        discount: 0,
+        total_price: product.price_sale * quantity,
+        created_at: new Date().toISOString()
+      };
       if (existingItemIndex > -1) {
         newItems[existingItemIndex] = newItem;
       } else {
@@ -94,16 +130,16 @@ export default function PedidosScreen() {
     }
     try {
       if (isEdit) {
-        await updateOrder(newOrder);
+        await updateOrder(newOrder as Order);
       } else {
-        await saveOrder(newOrder);
+        await saveOrder(newOrder as Order);
       }
       setStep('confirmation');
     } catch (e) {
       Alert.alert('Erro', 'Não foi possível salvar o pedido.');
     }
   };
-  
+
   const resetOrder = () => {
     setOrder({
       items: [],
@@ -116,9 +152,9 @@ export default function PedidosScreen() {
   const renderStep = () => {
     switch (step) {
       case 'customer':
-        return <CustomerStep theme={theme} onSelectCustomer={handleSelectCustomer} />;
+        return <CustomerStep theme={theme} customers={customers} loading={loading} onSelectCustomer={handleSelectCustomer} />;
       case 'products':
-        return <ProductsStep theme={theme} order={order} onUpdateItem={handleUpdateItem} onNext={() => setStep('shipping')} onBack={() => setStep('customer')} />;
+        return <ProductsStep theme={theme} products={products} order={order} onUpdateItem={handleUpdateItem} onNext={() => setStep('shipping')} onBack={() => setStep('customer')} />;
       case 'shipping':
         return <ShippingStep theme={theme} order={order} setOrder={setOrder} onNext={() => setStep('review')} onBack={() => setStep('products')} />;
       case 'review':
@@ -143,37 +179,53 @@ export default function PedidosScreen() {
 }
 
 // Step 1: Customer Selection
-const CustomerStep = ({ theme, onSelectCustomer }: { theme: any, onSelectCustomer: (customer: Customer) => void }) => (
+const CustomerStep = ({ theme, customers, loading, onSelectCustomer }: {
+  theme: any;
+  customers: Customer[];
+  loading: boolean;
+  onSelectCustomer: (customer: Customer) => void;
+}) => (
   <View style={[styles.stepContainer, { backgroundColor: theme.background }]}>
     <Text style={[styles.stepTitle, { color: theme.text }]}>Selecione o Cliente *</Text>
-    <FlatList
-      data={mockCustomers.filter(c => c.active)}
-      keyExtractor={item => item.id_customer.toString()}
-      renderItem={({ item }) => (
-        <TouchableOpacity style={[styles.listItem, { backgroundColor: theme.card }]} onPress={() => onSelectCustomer(item)}>
-          <Text style={[styles.listItemTitle, { color: theme.text }]}>{item.person.name}</Text>
-          <Text style={[styles.listItemSubtitle, { color: theme.textSecondary }]}>{item.person.cpf_cnpj}</Text>
-        </TouchableOpacity>
-      )}
-    />
+    {loading ? (
+      <Text style={{ color: theme.textSecondary, textAlign: 'center', marginTop: 20 }}>Carregando clientes...</Text>
+    ) : (
+      <FlatList
+        data={customers.filter((c: Customer) => c.active)}
+        keyExtractor={item => item.id_customer.toString()}
+        renderItem={({ item }) => (
+          <TouchableOpacity style={[styles.listItem, { backgroundColor: theme.card }]} onPress={() => onSelectCustomer(item)}>
+            <Text style={[styles.listItemTitle, { color: theme.text }]}>{item.person.name}</Text>
+            <Text style={[styles.listItemSubtitle, { color: theme.textSecondary }]}>{item.person.cpf_cnpj}</Text>
+          </TouchableOpacity>
+        )}
+      />
+    )}
   </View>
 );
 
 // Step 2: Product Selection
-const ProductsStep = ({ theme, order, onUpdateItem, onNext, onBack }: { theme: any, order: Partial<Order>, onUpdateItem: (product: Product, quantity: number) => void, onNext: () => void, onBack: () => void }) => {
+const ProductsStep = ({ theme, products, order, onUpdateItem, onNext, onBack }: {
+  theme: any;
+  products: Product[];
+  order: Partial<Order>;
+  onUpdateItem: (product: Product, quantity: number) => void;
+  onNext: () => void;
+  onBack: () => void;
+}) => {
   const totalItems = order.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
-  
+
   return (
     <View style={[styles.stepContainer, { backgroundColor: theme.background }]}>
-       <Text style={[styles.stepTitle, { color: theme.text }]}>Adicione os Produtos *</Text>
+      <Text style={[styles.stepTitle, { color: theme.text }]}>Adicione os Produtos *</Text>
       <FlatList
-        data={mockProducts.filter(p => p.active)}
+        data={products.filter((p: Product) => p.active)}
         keyExtractor={item => item.id_product.toString()}
         renderItem={({ item }) => (
           <View style={[styles.productItem, { backgroundColor: theme.card }]}>
             <View style={{ flex: 1 }}>
               <Text style={[styles.listItemTitle, { color: theme.text }]}>{item.name}</Text>
-              <Text style={[styles.listItemSubtitle, { color: theme.textSecondary }]}>R$ {item.price.toFixed(2)}</Text>
+              <Text style={[styles.listItemSubtitle, { color: theme.textSecondary }]}>R$ {item.price_sale.toFixed(2)}</Text>
             </View>
             <TextInput
               style={[styles.quantityInput, { backgroundColor: theme.background, borderColor: theme.border, color: theme.text }]}
@@ -185,9 +237,9 @@ const ProductsStep = ({ theme, order, onUpdateItem, onNext, onBack }: { theme: a
             />
           </View>
         )}
-        ListFooterComponent={<View style={{ height: 80 }}/>}
+        ListFooterComponent={<View style={{ height: 80 }} />}
       />
-       <View style={[styles.footer, { backgroundColor: theme.card }]}>  
+      <View style={[styles.footer, { backgroundColor: theme.card }]}>
         <TouchableOpacity style={[styles.backButton, { backgroundColor: theme.buttonSecondary, borderColor: theme.border }]} onPress={onBack}>
           <Text style={[styles.buttonText, { color: theme.background }]}>Voltar</Text>
         </TouchableOpacity>
@@ -235,14 +287,14 @@ const ShippingStep = ({ theme, order, setOrder, onNext, onBack }: { theme: any, 
             <TouchableOpacity
               key={type}
               style={[
-                styles.chip, 
+                styles.chip,
                 { backgroundColor: theme.inputBackground, borderColor: theme.border },
                 order.shipping_type === type && { backgroundColor: theme.primary, borderColor: theme.primary }
               ]}
               onPress={() => handleSelectShippingType(type)}
             >
               <Text style={[
-                styles.chipText, 
+                styles.chipText,
                 { color: theme.text },
                 order.shipping_type === type && { color: theme.buttonText }
               ]}>{type}</Text>
@@ -255,7 +307,7 @@ const ShippingStep = ({ theme, order, setOrder, onNext, onBack }: { theme: any, 
         <Text style={[styles.label, { color: theme.text }]}>Custo do Frete</Text>
         <TextInput
           style={[
-            styles.input, 
+            styles.input,
             { backgroundColor: theme.inputBackground, borderColor: theme.inputBorder, color: theme.text },
             order.shipping_type === 'RET' && { opacity: 0.5 }
           ]}
@@ -275,14 +327,14 @@ const ShippingStep = ({ theme, order, setOrder, onNext, onBack }: { theme: any, 
             <TouchableOpacity
               key={method.description}
               style={[
-                styles.chip, 
+                styles.chip,
                 { backgroundColor: theme.inputBackground, borderColor: theme.border },
                 selectedPaymentMethod === method.description && { backgroundColor: theme.primary, borderColor: theme.primary }
               ]}
               onPress={() => setSelectedPaymentMethod(method.description)}
             >
               <Text style={[
-                styles.chipText, 
+                styles.chipText,
                 { color: theme.text },
                 selectedPaymentMethod === method.description && { color: theme.buttonText }
               ]}>{method.description}</Text>
@@ -298,14 +350,14 @@ const ShippingStep = ({ theme, order, setOrder, onNext, onBack }: { theme: any, 
             <TouchableOpacity
               key={term}
               style={[
-                styles.chip, 
+                styles.chip,
                 { backgroundColor: theme.inputBackground, borderColor: theme.border },
                 selectedPaymentTerm === term && { backgroundColor: theme.primary, borderColor: theme.primary }
               ]}
               onPress={() => setSelectedPaymentTerm(term)}
             >
               <Text style={[
-                styles.chipText, 
+                styles.chipText,
                 { color: theme.text },
                 selectedPaymentTerm === term && { color: theme.buttonText }
               ]}>{term}</Text>
@@ -324,14 +376,14 @@ const ShippingStep = ({ theme, order, setOrder, onNext, onBack }: { theme: any, 
             Alert.alert('Erro', 'Selecione o método de pagamento.');
             return;
           }
-          // Salva o prazo de pagamento selecionado (como string e dias)
+          // Salva o prazo de pagamento selecionado
           let term_days = 0;
           if (selectedPaymentTerm === 'À vista') term_days = 0;
           else if (selectedPaymentTerm === '7/14/21') term_days = 21;
           else if (selectedPaymentTerm === '10/15/20') term_days = 20;
           else if (selectedPaymentTerm === '30/60/90') term_days = 90;
-          // Cria novo objeto payment_method com o prazo e label
-          setOrder({ ...order, payment_method: { ...method, term_days, term_label: selectedPaymentTerm } });
+          // Cria novo objeto payment_method com o prazo atualizado
+          setOrder({ ...order, payment_method: { ...method, term_days } });
           onNext();
         }}>
           <Text style={[styles.buttonText, { color: theme.buttonText }]}>Avançar</Text>
@@ -363,7 +415,7 @@ const ReviewStep = ({ theme, order, setOrder, onFinalize, onBack }: { theme: any
         <Text style={{ color: theme.textSecondary }}>Tipo de Frete: {order.shipping_type}</Text>
         <Text style={{ color: theme.textSecondary }}>Custo do Frete: R$ {order.shipping_cost?.toFixed(2)}</Text>
         <Text style={{ color: theme.textSecondary }}>Método de Pagamento: {order.payment_method?.description || 'Não informado'}</Text>
-        <Text style={{ color: theme.textSecondary }}>Prazo de Pagamento: {order.payment_method?.term_label || 'Não informado'}</Text>
+        <Text style={{ color: theme.textSecondary }}>Prazo: {order.payment_method?.term_days || 0} dias</Text>
       </View>
       <View style={styles.reviewSection}>
         <Text style={[styles.reviewTitle, { color: theme.text }]}>Total Geral: R$ {finalTotal.toFixed(2)}</Text>

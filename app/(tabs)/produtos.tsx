@@ -1,111 +1,65 @@
 import React, { useEffect, useState } from 'react';
 import {
-    Alert,
-    FlatList,
-    SafeAreaView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    useWindowDimensions,
-    View
+  Alert,
+  FlatList,
+  Image,
+  Modal,
+  RefreshControl,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  useWindowDimensions,
+  View
 } from 'react-native';
 import CreateProductModal from '../../components/CreateProductModal';
-import DeleteProductModal from '../../components/DeleteProductModal';
 import EditProductModal from '../../components/EditProductModal';
-import ProductDetailsScreen from '../../components/ProductDetailsScreen';
 import { useTheme } from '../../contexts/ThemeContext';
+import { ProductService } from '../../services/product.service';
 import { FilterType, Product } from './types/product';
-
-// simulando dados com novo formato
-const mockProducts: Product[] = [
-  {
-    id_product: 1,
-    name: "Café Torrado Premium",
-    description: "Café especial 100% arábica torrado em pequenos lotes",
-    category: "Grãos",
-    price_cost: 30.00,
-    price_sale: 45.90,
-    stock: 150,
-    net_weight: 0.5,
-    gross_weight: 0.6,
-    min_stock: 20,
-    max_stock: 300,
-    unit_measure: "KG",
-    ncm: "09011190",
-    cest: "1700100",
-    default_discount: 5,
-    active: true,
-    created_at: new Date().toISOString(),
-  },
-  {
-    id_product: 2,
-    name: "Azeite Extra Virgem",
-    description: "Azeite português de primeira prensagem a frio",
-    category: "Mercearia",
-    price_cost: 18.00,
-    price_sale: 28.50,
-    stock: 80,
-    net_weight: 0.5,
-    gross_weight: 0.8,
-    unit_measure: "LT",
-    active: true,
-    created_at: new Date().toISOString(),
-  },
-  {
-    id_product: 3,
-    name: "Queijo Minas Padrão",
-    category: "Laticínios",
-    price_cost: 45.00,
-    price_sale: 62.00,
-    stock: 0,
-    unit_measure: "KG",
-    active: false,
-    created_at: new Date().toISOString(),
-  },
-  {
-    id_product: 4,
-    name: "Doce de Leite Artesanal",
-    category: "Doces",
-    price_cost: 12.00,
-    price_sale: 22.00,
-    stock: 120,
-    unit_measure: "KG",
-    active: true,
-    created_at: new Date().toISOString(),
-  },
-  {
-    id_product: 5,
-    name: "Cachaça Envelhecida",
-    description: "Cachaça envelhecida em barris de carvalho por 3 anos",
-    category: "Bebidas",
-    price_cost: 60.00,
-    price_sale: 89.90,
-    stock: 40,
-    unit_measure: "LT",
-    ncm: "22089000",
-    active: false,
-    created_at: new Date().toISOString(),
-  }
-];
 
 export default function ProdutosScreen() {
   const { theme } = useTheme();
-  const [products, setProducts] = useState<Product[]>(mockProducts);
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>(mockProducts);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [searchText, setSearchText] = useState<string>('');
   const [filterActive, setFilterActive] = useState<FilterType>('all');
+  const [refreshing, setRefreshing] = useState(false);
 
   // Estados dos modais
   const [createModalVisible, setCreateModalVisible] = useState(false);
   const [editModalVisible, setEditModalVisible] = useState(false);
-  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [detailsModalVisible, setDetailsModalVisible] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
+
+  // Carregar produtos ao montar componente
+  useEffect(() => {
+    loadProducts();
+  }, []);
+
+  // Função para carregar produtos
+  const loadProducts = async () => {
+    try {
+      const loadedProducts = await ProductService.getAll();
+      setProducts(loadedProducts);
+    } catch (error) {
+      console.error('Erro ao carregar produtos:', error);
+      Alert.alert('Erro', 'Não foi possível carregar os produtos');
+    }
+  };
+
+  // Função para atualizar lista (pull to refresh)
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await loadProducts();
+    setRefreshing(false);
+  };
 
   // Função para filtrar produtos
   useEffect(() => {
@@ -135,37 +89,49 @@ export default function ProdutosScreen() {
   };
 
   // Funções CRUD
-  const handleCreateProduct = (newProduct: Product) => {
-    setProducts([...products, newProduct]);
-    Alert.alert('Sucesso', 'Produto criado com sucesso!');
+  const handleCreateProduct = async () => {
+    await loadProducts();
+    setCreateModalVisible(false);
   };
 
-  const handleEditProduct = (updatedProduct: Product) => {
-    setProducts(products.map(p => 
-      p.id_product === updatedProduct.id_product ? updatedProduct : p
-    ));
+  const handleEditProduct = async () => {
+    await loadProducts();
     setEditModalVisible(false);
     setDetailsModalVisible(false);
-    Alert.alert('Sucesso', 'Produto atualizado com sucesso!');
   };
 
-  const handleDeleteProduct = () => {
-    if (selectedProduct) {
-      setProducts(products.filter(p => p.id_product !== selectedProduct.id_product));
-      setDeleteModalVisible(false);
+  const handleDeleteProduct = async (hardDelete: boolean = false) => {
+    if (!selectedProduct) return;
+
+    try {
+      if (hardDelete) {
+        await ProductService.hardDelete(selectedProduct.id_product);
+        Alert.alert('Sucesso', 'Produto excluído permanentemente!');
+      } else {
+        await ProductService.delete(selectedProduct.id_product);
+        Alert.alert('Sucesso', 'Produto desativado com sucesso!');
+      }
+
+      await loadProducts();
       setDetailsModalVisible(false);
-      Alert.alert('Sucesso', 'Produto excluído com sucesso!');
+      setSelectedProduct(null);
+    } catch (error) {
+      Alert.alert('Erro', 'Não foi possível excluir o produto');
     }
   };
 
-  const handleToggleActive = () => {
-    if (selectedProduct) {
+  const handleToggleActive = async () => {
+    if (!selectedProduct) return;
+
+    try {
       const updatedProduct = { ...selectedProduct, active: !selectedProduct.active };
-      setProducts(products.map(p => 
-        p.id_product === updatedProduct.id_product ? updatedProduct : p
-      ));
+      await ProductService.update(selectedProduct.id_product, updatedProduct);
+
+      await loadProducts();
       setSelectedProduct(updatedProduct);
       Alert.alert('Sucesso', `Produto ${updatedProduct.active ? 'ativado' : 'desativado'} com sucesso!`);
+    } catch (error) {
+      Alert.alert('Erro', 'Não foi possível atualizar o produto');
     }
   };
 
@@ -179,9 +145,46 @@ export default function ProdutosScreen() {
     setEditModalVisible(true);
   };
 
-  const openDelete = () => {
+  const openDeleteConfirmation = () => {
     setDetailsModalVisible(false);
-    setDeleteModalVisible(true);
+
+    Alert.alert(
+      'Confirmar Exclusão',
+      `Deseja excluir o produto "${selectedProduct?.name}"?`,
+      [
+        {
+          text: 'Cancelar',
+          style: 'cancel',
+          onPress: () => setDetailsModalVisible(true)
+        },
+        {
+          text: 'Desativar',
+          style: 'default',
+          onPress: () => handleDeleteProduct(false)
+        },
+        {
+          text: 'Excluir Permanentemente',
+          style: 'destructive',
+          onPress: () => {
+            Alert.alert(
+              'Atenção!',
+              'Esta ação não pode ser desfeita. Confirma a exclusão permanente?',
+              [
+                {
+                  text: 'Cancelar',
+                  style: 'cancel'
+                },
+                {
+                  text: 'Sim, Excluir',
+                  style: 'destructive',
+                  onPress: () => handleDeleteProduct(true)
+                }
+              ]
+            );
+          }
+        }
+      ]
+    );
   };
 
   // Componente do Card do Produto
@@ -274,6 +277,14 @@ export default function ProdutosScreen() {
         showsVerticalScrollIndicator={false}
         numColumns={isTablet ? 2 : 1}
         key={isTablet ? 'tablet' : 'phone'}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={[theme.primary]}
+            tintColor={theme.primary}
+          />
+        }
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Text style={[styles.emptyText, { color: theme.textSecondary }]}>Nenhum produto encontrado</Text>
@@ -296,31 +307,170 @@ export default function ProdutosScreen() {
       <CreateProductModal
         visible={createModalVisible}
         onClose={() => setCreateModalVisible(false)}
-        onSave={handleCreateProduct}
+        onSuccess={handleCreateProduct}
       />
 
       <EditProductModal
         visible={editModalVisible}
         product={selectedProduct}
         onClose={() => setEditModalVisible(false)}
-        onSave={handleEditProduct}
+        onSuccess={handleEditProduct}
       />
 
-      <DeleteProductModal
-        visible={deleteModalVisible}
-        product={selectedProduct}
-        onClose={() => setDeleteModalVisible(false)}
-        onConfirm={handleDeleteProduct}
-      />
-
-      <ProductDetailsScreen
+      {/* Details Modal */}
+      <Modal
         visible={detailsModalVisible}
-        product={selectedProduct}
-        onClose={() => setDetailsModalVisible(false)}
-        onEdit={openEdit}
-        onDelete={openDelete}
-        onToggleActive={handleToggleActive}
-      />
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setDetailsModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.detailsModal, { backgroundColor: theme.card }]}>
+            <ScrollView showsVerticalScrollIndicator={false}>
+              {/* Header */}
+              <View style={styles.detailsHeader}>
+                <Text style={[styles.detailsTitle, { color: theme.text }]}>
+                  Detalhes do Produto
+                </Text>
+                <TouchableOpacity onPress={() => setDetailsModalVisible(false)}>
+                  <Text style={[styles.closeButton, { color: theme.primary }]}>✕</Text>
+                </TouchableOpacity>
+              </View>
+
+              {selectedProduct && (
+                <>
+                  {/* Photo */}
+                  {selectedProduct.photo_url && (
+                    <View style={styles.detailsPhotoContainer}>
+                      <Image
+                        source={{ uri: selectedProduct.photo_url }}
+                        style={styles.detailsPhoto}
+                        resizeMode="cover"
+                      />
+                    </View>
+                  )}
+
+                  {/* Status Badge */}
+                  <View style={[
+                    styles.statusBadge,
+                    { backgroundColor: selectedProduct.active ? '#4caf50' : '#f44336' }
+                  ]}>
+                    <Text style={styles.statusBadgeText}>
+                      {selectedProduct.active ? 'ATIVO' : 'INATIVO'}
+                    </Text>
+                  </View>
+
+                  {/* Info Sections */}
+                  <View style={styles.detailsSection}>
+                    <Text style={[styles.detailsLabel, { color: theme.textSecondary }]}>Nome</Text>
+                    <Text style={[styles.detailsValue, { color: theme.text }]}>{selectedProduct.name}</Text>
+                  </View>
+
+                  {selectedProduct.description && (
+                    <View style={styles.detailsSection}>
+                      <Text style={[styles.detailsLabel, { color: theme.textSecondary }]}>Descrição</Text>
+                      <Text style={[styles.detailsValue, { color: theme.text }]}>{selectedProduct.description}</Text>
+                    </View>
+                  )}
+
+                  <View style={styles.detailsRow}>
+                    <View style={[styles.detailsSection, { flex: 1 }]}>
+                      <Text style={[styles.detailsLabel, { color: theme.textSecondary }]}>Categoria</Text>
+                      <Text style={[styles.detailsValue, { color: theme.text }]}>{selectedProduct.category}</Text>
+                    </View>
+                    <View style={[styles.detailsSection, { flex: 1 }]}>
+                      <Text style={[styles.detailsLabel, { color: theme.textSecondary }]}>Unidade</Text>
+                      <Text style={[styles.detailsValue, { color: theme.text }]}>{selectedProduct.unit_measure}</Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.detailsRow}>
+                    <View style={[styles.detailsSection, { flex: 1 }]}>
+                      <Text style={[styles.detailsLabel, { color: theme.textSecondary }]}>Preço Custo</Text>
+                      <Text style={[styles.detailsValue, { color: theme.text }]}>
+                        {ProductService.formatCurrency(selectedProduct.price_cost)}
+                      </Text>
+                    </View>
+                    <View style={[styles.detailsSection, { flex: 1 }]}>
+                      <Text style={[styles.detailsLabel, { color: theme.textSecondary }]}>Preço Venda</Text>
+                      <Text style={[styles.detailsValue, { color: theme.text }]}>
+                        {ProductService.formatCurrency(selectedProduct.price_sale)}
+                      </Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.detailsSection}>
+                    <Text style={[styles.detailsLabel, { color: theme.textSecondary }]}>Estoque</Text>
+                    <Text style={[styles.detailsValue, { color: theme.text }]}>
+                      {selectedProduct.stock} {selectedProduct.unit_measure}
+                    </Text>
+                  </View>
+
+                  {(selectedProduct.net_weight || selectedProduct.gross_weight) && (
+                    <View style={styles.detailsRow}>
+                      {selectedProduct.net_weight && (
+                        <View style={[styles.detailsSection, { flex: 1 }]}>
+                          <Text style={[styles.detailsLabel, { color: theme.textSecondary }]}>Peso Líquido</Text>
+                          <Text style={[styles.detailsValue, { color: theme.text }]}>{selectedProduct.net_weight} kg</Text>
+                        </View>
+                      )}
+                      {selectedProduct.gross_weight && (
+                        <View style={[styles.detailsSection, { flex: 1 }]}>
+                          <Text style={[styles.detailsLabel, { color: theme.textSecondary }]}>Peso Bruto</Text>
+                          <Text style={[styles.detailsValue, { color: theme.text }]}>{selectedProduct.gross_weight} kg</Text>
+                        </View>
+                      )}
+                    </View>
+                  )}
+
+                  {(selectedProduct.ncm || selectedProduct.cest) && (
+                    <View style={styles.detailsRow}>
+                      {selectedProduct.ncm && (
+                        <View style={[styles.detailsSection, { flex: 1 }]}>
+                          <Text style={[styles.detailsLabel, { color: theme.textSecondary }]}>NCM</Text>
+                          <Text style={[styles.detailsValue, { color: theme.text }]}>{selectedProduct.ncm}</Text>
+                        </View>
+                      )}
+                      {selectedProduct.cest && (
+                        <View style={[styles.detailsSection, { flex: 1 }]}>
+                          <Text style={[styles.detailsLabel, { color: theme.textSecondary }]}>CEST</Text>
+                          <Text style={[styles.detailsValue, { color: theme.text }]}>{selectedProduct.cest}</Text>
+                        </View>
+                      )}
+                    </View>
+                  )}
+
+                  {/* Action Buttons */}
+                  <View style={styles.detailsActions}>
+                    <TouchableOpacity
+                      style={[styles.actionButton, { backgroundColor: '#3B82F6' }]}
+                      onPress={openEdit}
+                    >
+                      <Text style={styles.actionButtonText}>Editar</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      style={[styles.actionButton, { backgroundColor: selectedProduct.active ? '#f59e0b' : '#10b981' }]}
+                      onPress={handleToggleActive}
+                    >
+                      <Text style={styles.actionButtonText}>
+                        {selectedProduct.active ? 'Desativar' : 'Ativar'}
+                      </Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      style={[styles.actionButton, { backgroundColor: '#DC2626' }]}
+                      onPress={openDeleteConfirmation}
+                    >
+                      <Text style={styles.actionButtonText}>Excluir</Text>
+                    </TouchableOpacity>
+                  </View>
+                </>
+              )}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -474,5 +624,93 @@ const styles = StyleSheet.create({
   addButtonText: {
     fontSize: 24,
     fontWeight: 'bold',
+  },
+  // Details Modal Styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  detailsModal: {
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    maxHeight: '90%',
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+  },
+  detailsHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+  },
+  detailsTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  closeButton: {
+    fontSize: 28,
+    fontWeight: '300',
+    paddingHorizontal: 8,
+  },
+  detailsPhotoContainer: {
+    alignItems: 'center',
+    paddingVertical: 20,
+  },
+  detailsPhoto: {
+    width: 200,
+    height: 200,
+    borderRadius: 12,
+  },
+  statusBadge: {
+    alignSelf: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    borderRadius: 16,
+    marginBottom: 20,
+  },
+  statusBadgeText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 12,
+  },
+  detailsSection: {
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+  },
+  detailsRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  detailsLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    marginBottom: 4,
+  },
+  detailsValue: {
+    fontSize: 16,
+  },
+  detailsActions: {
+    flexDirection: 'row',
+    gap: 12,
+    padding: 20,
+    paddingTop: 24,
+  },
+  actionButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  actionButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 14,
   },
 });

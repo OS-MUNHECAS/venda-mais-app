@@ -1,7 +1,7 @@
 
 import { useIsFocused, useNavigation } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
-import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { Alert, FlatList, StyleSheet, Text, View } from 'react-native';
 import OrderDetailsScreen from '../../components/OrderDetailsScreen';
 import { useTheme } from '../../contexts/ThemeContext';
 import { deleteOrder } from '../../services/order-delete.service';
@@ -19,12 +19,22 @@ export default function HistoricoScreen() {
 
   useEffect(() => {
     if (isFocused) {
-      loadOrders().then(setOrders);
+      loadOrdersData();
     }
   }, [isFocused]);
 
+  const loadOrdersData = async () => {
+    try {
+      const data = await loadOrders();
+      setOrders(data);
+    } catch (error) {
+      console.error('Erro ao carregar pedidos:', error);
+      Alert.alert('Erro', 'Não foi possível carregar o histórico de pedidos');
+    }
+  };
+
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }] }>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
       <Text style={[styles.title, { color: theme.text }]}>Histórico de Pedidos</Text>
       {orders.length === 0 ? (
         <Text style={[styles.subtitle, { color: theme.textSecondary }]}>Nenhum pedido realizado ainda.</Text>
@@ -33,7 +43,7 @@ export default function HistoricoScreen() {
           data={orders.sort((a, b) => (b.created_at > a.created_at ? 1 : -1))}
           keyExtractor={item => item.id_order.toString()}
           renderItem={({ item }) => (
-            <View style={[styles.orderCard, { backgroundColor: theme.card }] }>
+            <View style={[styles.orderCard, { backgroundColor: theme.card }]}>
               <Text style={[styles.orderTitle, { color: theme.text }]}>Pedido #{item.id_order}</Text>
               <Text style={{ color: theme.textSecondary }}>Cliente: {item.customer?.person.name}</Text>
               <Text style={{ color: theme.textSecondary }}>Total: R$ {item.total_amount?.toFixed(2)}</Text>
@@ -41,13 +51,17 @@ export default function HistoricoScreen() {
               <Text style={{ color: theme.textSecondary }}>Status: {item.status}</Text>
               <View style={{ flexDirection: 'row', marginTop: 8, alignItems: 'center' }}>
                 <Text style={{ color: theme.primary, marginRight: 16 }} onPress={() => { setSelectedOrder(item); setModalVisible(true); }}>Ver detalhes</Text>
-                <Text style={{ color: theme.primary, marginRight: 16, fontWeight: 'bold' }} onPress={() => {
-                  navigation.navigate('pedidos', { orderToEdit: item });
-                }}>Editar</Text>
+                {/* Edição de pedidos temporariamente desabilitada */}
+                {/* <Text style={{ color: theme.primary, marginRight: 16, fontWeight: 'bold' }} onPress={() => {
+                  navigation.navigate('pedidos' as never, { orderToEdit: item } as never);
+                }}>Editar</Text> */}
                 <Text style={{ color: 'red', fontWeight: 'bold' }} onPress={async () => {
-                  await deleteOrder(item.id_order);
-                  const updated = await loadOrders();
-                  setOrders(updated);
+                  try {
+                    await deleteOrder(item.id_order);
+                    await loadOrdersData();
+                  } catch (error) {
+                    Alert.alert('Erro', 'Não foi possível excluir o pedido');
+                  }
                 }}>Excluir</Text>
               </View>
             </View>
