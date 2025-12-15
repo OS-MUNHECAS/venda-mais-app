@@ -1,21 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
+    ActivityIndicator,
+    Alert,
+    KeyboardAvoidingView,
     Modal,
-    View,
+    Platform,
+    ScrollView,
+    Switch,
     Text,
     TextInput,
     TouchableOpacity,
-    ScrollView,
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    Switch,
-    ActivityIndicator,
+    View,
 } from 'react-native';
-import { Customer, ContactFormData } from '../app/(tabs)/types/customer';
+import { AddressFormData } from '../app/(tabs)/types/address';
+import { ContactFormData, Customer } from '../app/(tabs)/types/customer';
 import { CustomerService } from '../services/customer.service';
 import { ViaCEPService } from '../services/viacep.service';
-import { AddressFormData } from '../app/(tabs)/types/address';
+
+import { useTheme } from '../contexts/ThemeContext';
 
 interface Props {
     visible: boolean;
@@ -25,6 +27,7 @@ interface Props {
 }
 
 export default function EditCustomerModal({ visible, customerId, onClose, onSuccess }: Props) {
+    const { theme } = useTheme();
     const [customer, setCustomer] = useState<Customer | null>(null);
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
@@ -240,9 +243,9 @@ export default function EditCustomerModal({ visible, customerId, onClose, onSucc
     if (loading) {
         return (
             <Modal visible={visible} animationType="slide" presentationStyle="pageSheet">
-                <View style={styles.loadingContainer}>
-                    <ActivityIndicator size="large" color="#2196F3" />
-                    <Text style={styles.loadingText}>Carregando dados do cliente...</Text>
+                <View style={[styles.loadingContainer, { backgroundColor: theme.background }]}>
+                    <ActivityIndicator size="large" color={theme.primary} />
+                    <Text style={[styles.loadingText, { color: theme.textSecondary }]}>Carregando dados do cliente...</Text>
                 </View>
             </Modal>
         );
@@ -254,45 +257,46 @@ export default function EditCustomerModal({ visible, customerId, onClose, onSucc
                 style={{ flex: 1 }}
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             >
-                <View style={styles.container}>
-                    <View style={styles.header}>
-                        <Text style={styles.title}>Editar Cliente</Text>
+                <View style={[styles.container, { backgroundColor: theme.background }]}>
+                    <View style={[styles.header, { backgroundColor: theme.primary }]}>
+                        <Text style={[styles.title, { color: theme.buttonText }]}>Editar Cliente</Text>
                         <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-                            <Text style={styles.closeButtonText}>✕</Text>
+                            <Text style={[styles.closeButtonText, { color: theme.buttonText }]}>✕</Text>
                         </TouchableOpacity>
                     </View>
 
                     <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
                         {/* Dados Pessoais */}
-                        <View style={styles.section}>
-                            <Text style={styles.sectionTitle}>Dados Pessoais</Text>
+                        <View style={[styles.section, { backgroundColor: theme.card }]}>
+                            <Text style={[styles.sectionTitle, { color: theme.text }]}>Dados Pessoais</Text>
 
                             <View style={styles.inputGroup}>
-                                <Text style={styles.label}>Nome *</Text>
+                                <Text style={[styles.label, { color: theme.text }]}>Nome *</Text>
                                 <TextInput
-                                    style={styles.input}
+                                    style={[styles.input, { backgroundColor: theme.inputBackground, borderColor: theme.inputBorder, color: theme.text }]}
                                     value={formData.name}
                                     onChangeText={(text) => setFormData(prev => ({ ...prev, name: text }))}
                                     placeholder="Nome completo"
+                                    placeholderTextColor={theme.textSecondary}
                                 />
                             </View>
 
                             <View style={styles.inputGroup}>
-                                <Text style={styles.label}>Tipo de Pessoa *</Text>
+                                <Text style={[styles.label, { color: theme.text }]}>Tipo de Pessoa *</Text>
                                 <View style={styles.radioGroup}>
                                     <TouchableOpacity
-                                        style={[styles.radioOption, formData.person_type === 'F' && styles.radioSelected]}
+                                        style={[styles.radioOption, { backgroundColor: theme.inputBackground, borderColor: theme.inputBorder }, formData.person_type === 'F' && { backgroundColor: theme.primary, borderColor: theme.primary }]}
                                         onPress={() => handlePersonTypeChange('F')}
                                     >
-                                        <Text style={[styles.radioText, formData.person_type === 'F' && styles.radioTextSelected]}>
+                                        <Text style={[styles.radioText, { color: theme.text }, formData.person_type === 'F' && { color: theme.buttonText }]}>
                                             Pessoa Física
                                         </Text>
                                     </TouchableOpacity>
                                     <TouchableOpacity
-                                        style={[styles.radioOption, formData.person_type === 'J' && styles.radioSelected]}
+                                        style={[styles.radioOption, { backgroundColor: theme.inputBackground, borderColor: theme.inputBorder }, formData.person_type === 'J' && { backgroundColor: theme.primary, borderColor: theme.primary }]}
                                         onPress={() => handlePersonTypeChange('J')}
                                     >
-                                        <Text style={[styles.radioText, formData.person_type === 'J' && styles.radioTextSelected]}>
+                                        <Text style={[styles.radioText, { color: theme.text }, formData.person_type === 'J' && { color: theme.buttonText }]}>
                                             Pessoa Jurídica
                                         </Text>
                                     </TouchableOpacity>
@@ -300,45 +304,49 @@ export default function EditCustomerModal({ visible, customerId, onClose, onSucc
                             </View>
 
                             <View style={styles.inputGroup}>
-                                <Text style={styles.label}>
+                                <Text style={[styles.label, { color: theme.text }]}>
                                     {formData.person_type === 'F' ? 'CPF' : 'CNPJ'} *
                                 </Text>
                                 <TextInput
-                                    style={styles.input}
+                                    style={[styles.input, { backgroundColor: theme.inputBackground, borderColor: theme.inputBorder, color: theme.text }]}
                                     value={formData.cpf_cnpj}
                                     onChangeText={handleDocumentChange}
                                     placeholder={formData.person_type === 'F' ? '000.000.000-00' : '00.000.000/0000-00'}
+                                    placeholderTextColor={theme.textSecondary}
                                     keyboardType="numeric"
                                 />
                             </View>
 
                             <View style={styles.inputGroup}>
-                                <Text style={styles.label}>Observações</Text>
+                                <Text style={[styles.label, { color: theme.text }]}>Observações</Text>
                                 <TextInput
-                                    style={[styles.input, styles.textArea]}
+                                    style={[styles.input, styles.textArea, { backgroundColor: theme.inputBackground, borderColor: theme.inputBorder, color: theme.text }]}
                                     value={formData.observations}
                                     onChangeText={(text) => setFormData(prev => ({ ...prev, observations: text }))}
                                     placeholder="Observações sobre o cliente"
+                                    placeholderTextColor={theme.textSecondary}
                                     multiline
                                     numberOfLines={3}
                                 />
                             </View>
 
                             <View style={styles.switchGroup}>
-                                <Text style={styles.label}>Cliente Ativo</Text>
+                                <Text style={[styles.label, { color: theme.text }]}>Cliente Ativo</Text>
                                 <Switch
                                     value={formData.active}
                                     onValueChange={(value) => setFormData(prev => ({ ...prev, active: value }))}
+                                    trackColor={{ false: theme.inputBorder, true: theme.primary }}
+                                    thumbColor={formData.active ? theme.buttonText : theme.textSecondary}
                                 />
                             </View>
                         </View>
 
                         {/* Contatos */}
-                        <View style={styles.section}>
+                        <View style={[styles.section, { backgroundColor: theme.card }]}>
                             <View style={styles.sectionHeader}>
-                                <Text style={styles.sectionTitle}>Contatos</Text>
-                                <TouchableOpacity onPress={addContact} style={styles.addButton}>
-                                    <Text style={styles.addButtonText}>+ Adicionar</Text>
+                                <Text style={[styles.sectionTitle, { color: theme.text }]}>Contatos</Text>
+                                <TouchableOpacity onPress={addContact} style={[styles.addButton, { backgroundColor: theme.primary }]}>
+                                    <Text style={[styles.addButtonText, { color: theme.buttonText }]}>+ Adicionar</Text>
                                 </TouchableOpacity>
                             </View>
 
@@ -346,43 +354,44 @@ export default function EditCustomerModal({ visible, customerId, onClose, onSucc
                                 <View key={index} style={styles.contactRow}>
                                     <View style={styles.contactTypeContainer}>
                                         <TouchableOpacity
-                                            style={[styles.contactTypeButton, contact.contact_type === 'E' && styles.contactTypeSelected]}
+                                            style={[styles.contactTypeButton, { backgroundColor: theme.inputBackground, borderColor: theme.inputBorder }, contact.contact_type === 'E' && { backgroundColor: theme.primary, borderColor: theme.primary }]}
                                             onPress={() => updateContact(index, 'contact_type', 'E')}
                                         >
-                                            <Text style={[styles.contactTypeText, contact.contact_type === 'E' && styles.contactTypeTextSelected]}>
+                                            <Text style={[styles.contactTypeText, { color: theme.text }, contact.contact_type === 'E' && { color: theme.buttonText }]}>
                                                 Email
                                             </Text>
                                         </TouchableOpacity>
                                         <TouchableOpacity
-                                            style={[styles.contactTypeButton, contact.contact_type === 'T' && styles.contactTypeSelected]}
+                                            style={[styles.contactTypeButton, { backgroundColor: theme.inputBackground, borderColor: theme.inputBorder }, contact.contact_type === 'T' && { backgroundColor: theme.primary, borderColor: theme.primary }]}
                                             onPress={() => updateContact(index, 'contact_type', 'T')}
                                         >
-                                            <Text style={[styles.contactTypeText, contact.contact_type === 'T' && styles.contactTypeTextSelected]}>
+                                            <Text style={[styles.contactTypeText, { color: theme.text }, contact.contact_type === 'T' && { color: theme.buttonText }]}>
                                                 Telefone
                                             </Text>
                                         </TouchableOpacity>
                                         <TouchableOpacity
-                                            style={[styles.contactTypeButton, contact.contact_type === 'W' && styles.contactTypeSelected]}
+                                            style={[styles.contactTypeButton, { backgroundColor: theme.inputBackground, borderColor: theme.inputBorder }, contact.contact_type === 'W' && { backgroundColor: theme.primary, borderColor: theme.primary }]}
                                             onPress={() => updateContact(index, 'contact_type', 'W')}
                                         >
-                                            <Text style={[styles.contactTypeText, contact.contact_type === 'W' && styles.contactTypeTextSelected]}>
+                                            <Text style={[styles.contactTypeText, { color: theme.text }, contact.contact_type === 'W' && { color: theme.buttonText }]}>
                                                 WhatsApp
                                             </Text>
                                         </TouchableOpacity>
                                     </View>
                                     <TextInput
-                                        style={[styles.input, styles.contactInput]}
+                                        style={[styles.input, styles.contactInput, { backgroundColor: theme.inputBackground, borderColor: theme.inputBorder, color: theme.text }]}
                                         value={contact.value}
                                         onChangeText={(text) => updateContact(index, 'value', text)}
                                         placeholder={
                                             contact.contact_type === 'E' ? 'email@exemplo.com' :
                                                 contact.contact_type === 'T' ? '(00) 0000-0000' : '(00) 90000-0000'
                                         }
+                                        placeholderTextColor={theme.inputPlaceholder}
                                         keyboardType={contact.contact_type === 'E' ? 'email-address' : 'phone-pad'}
                                     />
                                     {contacts.length > 1 && (
-                                        <TouchableOpacity onPress={() => removeContact(index)} style={styles.removeButton}>
-                                            <Text style={styles.removeButtonText}>✕</Text>
+                                        <TouchableOpacity onPress={() => removeContact(index)} style={[styles.removeButton, { backgroundColor: theme.error }]}>
+                                            <Text style={[styles.removeButtonText, { color: theme.buttonText }]}>✕</Text>
                                         </TouchableOpacity>
                                     )}
                                 </View>
@@ -390,46 +399,46 @@ export default function EditCustomerModal({ visible, customerId, onClose, onSucc
                         </View>
 
                         {/* Endereços */}
-                        <View style={styles.section}>
+                        <View style={[styles.section, { backgroundColor: theme.card }]}>
                             <View style={styles.sectionHeader}>
-                                <Text style={styles.sectionTitle}>Endereços</Text>
+                                <Text style={[styles.sectionTitle, { color: theme.text }]}>Endereços</Text>
                                 <TouchableOpacity
                                     onPress={() => setShowAddressForm(!showAddressForm)}
-                                    style={styles.addButton}
+                                    style={[styles.addButton, { backgroundColor: theme.primary }]}
                                 >
-                                    <Text style={styles.addButtonText}>+ Adicionar</Text>
+                                    <Text style={[styles.addButtonText, { color: theme.buttonText }]}>+ Adicionar</Text>
                                 </TouchableOpacity>
                             </View>
 
                             {/* Lista de endereços */}
                             {addresses.map((address, index) => (
-                                <View key={index} style={styles.addressCard}>
+                                <View key={index} style={[styles.addressCard, { backgroundColor: theme.inputBackground, borderColor: theme.border }]}>
                                     <View style={styles.addressInfo}>
-                                        <Text style={styles.addressText}>
+                                        <Text style={[styles.addressText, { color: theme.text }]}>
                                             {address.street}, {address.number}
                                         </Text>
-                                        <Text style={styles.addressText}>
+                                        <Text style={[styles.addressText, { color: theme.text }]}>
                                             {address.neighborhood} - CEP: {address.cep}
                                         </Text>
-                                        <Text style={styles.addressType}>
+                                        <Text style={[styles.addressType, { color: theme.textSecondary }]}>
                                             {address.type === 'R' ? 'Residencial' : address.type === 'C' ? 'Comercial' : 'Entrega'}
                                             {address.is_main && ' (Principal)'}
                                         </Text>
                                     </View>
-                                    <TouchableOpacity onPress={() => removeAddress(index)} style={styles.removeButton}>
-                                        <Text style={styles.removeButtonText}>✕</Text>
+                                    <TouchableOpacity onPress={() => removeAddress(index)} style={[styles.removeButton, { backgroundColor: theme.error }]}>
+                                        <Text style={[styles.removeButtonText, { color: theme.buttonText }]}>✕</Text>
                                     </TouchableOpacity>
                                 </View>
                             ))}
 
                             {/* Formulário de endereço (mesmo do CreateCustomerModal) */}
                             {showAddressForm && (
-                                <View style={styles.addressForm}>
+                                <View style={[styles.addressForm, { backgroundColor: theme.background, borderColor: theme.border }]}>
                                     {/* Formulário simplificado - mesmo código do modal de criação */}
                                     <View style={styles.inputGroup}>
-                                        <Text style={styles.label}>CEP *</Text>
+                                        <Text style={[styles.label, { color: theme.text }]}>CEP *</Text>
                                         <TextInput
-                                            style={styles.input}
+                                            style={[styles.input, { backgroundColor: theme.inputBackground, borderColor: theme.inputBorder, color: theme.text }]}
                                             value={currentAddress.cep}
                                             onChangeText={(text) => {
                                                 const formatted = ViaCEPService.formatCEP(text);
@@ -437,33 +446,34 @@ export default function EditCustomerModal({ visible, customerId, onClose, onSucc
                                                 handleCEPSearch(formatted);
                                             }}
                                             placeholder="00000-000"
+                                            placeholderTextColor={theme.textSecondary}
                                             keyboardType="numeric"
                                         />
-                                        {loadingCEP && <Text style={styles.loadingText}>Buscando...</Text>}
+                                        {loadingCEP && <Text style={[styles.loadingText, { color: theme.textSecondary }]}>Buscando...</Text>}
                                     </View>
 
-                                    <TouchableOpacity onPress={addAddress} style={styles.addAddressButton}>
-                                        <Text style={styles.addAddressButtonText}>Adicionar Endereço</Text>
+                                    <TouchableOpacity onPress={addAddress} style={[styles.addAddressButton, { backgroundColor: theme.primary }]}>
+                                        <Text style={[styles.addAddressButtonText, { color: theme.buttonText }]}>Adicionar Endereço</Text>
                                     </TouchableOpacity>
                                 </View>
                             )}
                         </View>
                     </ScrollView>
 
-                    <View style={styles.footer}>
+                    <View style={[styles.footer, { backgroundColor: theme.card, borderTopColor: theme.border }]}>
                         <TouchableOpacity
                             onPress={onClose}
-                            style={[styles.button, styles.cancelButton]}
+                            style={[styles.button, styles.cancelButton, { backgroundColor: theme.inputBackground, borderColor: theme.border }]}
                             disabled={saving}
                         >
-                            <Text style={styles.cancelButtonText}>Cancelar</Text>
+                            <Text style={[styles.cancelButtonText, { color: theme.text }]}>Cancelar</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                             onPress={handleSubmit}
-                            style={[styles.button, styles.submitButton]}
+                            style={[styles.button, styles.submitButton, { backgroundColor: theme.primary }]}
                             disabled={saving}
                         >
-                            <Text style={styles.submitButtonText}>
+                            <Text style={[styles.submitButtonText, { color: theme.buttonText }]}>
                                 {saving ? 'Salvando...' : 'Atualizar'}
                             </Text>
                         </TouchableOpacity>

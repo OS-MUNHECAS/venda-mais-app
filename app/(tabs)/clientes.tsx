@@ -1,26 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-  StyleSheet,
-  Text,
-  View,
-  FlatList,
-  TouchableOpacity,
-  TextInput,
-  SafeAreaView,
-  StatusBar,
-  useWindowDimensions,
-  Alert,
-  RefreshControl,
-  Image,
+    Alert,
+    FlatList,
+    Image,
+    RefreshControl,
+    SafeAreaView,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    useWindowDimensions,
+    View,
 } from 'react-native';
-import { Customer, Contact, FilterType } from './types/customer';
-import { CustomerService } from '../../services/customer.service';
 import CreateCustomerModal from '../../components/CreateCustomerModal';
-import EditCustomerModal from '../../components/EditCustomerModal';
 import CustomerDetailsScreen from '../../components/CustomerDetailsScreen';
 import DeleteCustomerModal from '../../components/DeleteCustomerModal';
+import EditCustomerModal from '../../components/EditCustomerModal';
+import { useTheme } from '../../contexts/ThemeContext';
+import { CustomerService } from '../../services/customer.service';
+import { Contact, Customer, FilterType } from './types/customer';
 
 export default function ClientesScreen() {
+  const { theme } = useTheme();
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [filteredCustomers, setFilteredCustomers] = useState<Customer[]>([]);
   const [searchText, setSearchText] = useState<string>('');
@@ -139,6 +141,7 @@ export default function ClientesScreen() {
     <TouchableOpacity
       style={[
         styles.customerCard,
+        { backgroundColor: theme.card },
         !item.active && styles.inactiveCard,
         isTablet && styles.tabletCard
       ]}
@@ -171,7 +174,7 @@ export default function ClientesScreen() {
         </View>
 
         <View style={styles.customerInfo}>
-          <Text style={styles.customerName}>{item.person.name}</Text>
+          <Text style={[styles.customerName, { color: theme.text }]}>{item.person.name}</Text>
           <View style={styles.typeContainer}>
             <Text style={[
               styles.typeTag,
@@ -188,16 +191,16 @@ export default function ClientesScreen() {
       </View>
 
       <View style={styles.cardBody}>
-        <Text style={styles.documentText}>{item.person.cpf_cnpj}</Text>
-        <Text style={styles.lastPurchaseText}>
+        <Text style={[styles.documentText, { color: theme.textSecondary }]}>{item.person.cpf_cnpj}</Text>
+        <Text style={[styles.lastPurchaseText, { color: theme.textSecondary }]}>
           Última compra: {formatDate(item.last_purchase)}
         </Text>
 
         <View style={styles.contactsContainer}>
-          <Text style={styles.contactText}>
+          <Text style={[styles.contactText, { color: theme.text }]}>
             {getContact(item.contacts, 'E')}
           </Text>
-          <Text style={styles.contactText}>
+          <Text style={[styles.contactText, { color: theme.text }]}>
             {getContact(item.contacts, 'T')}
           </Text>
         </View>
@@ -206,22 +209,22 @@ export default function ClientesScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#2196F3" />
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+      <StatusBar barStyle="light-content" backgroundColor={theme.primary} />
 
       {/* Search Bar */}
-      <View style={styles.searchContainer}>
+      <View style={[styles.searchContainer, { backgroundColor: theme.card }]}>
         <TextInput
-          style={styles.searchInput}
+          style={[styles.searchInput, { backgroundColor: theme.background, borderColor: theme.border, color: theme.text }]}
           placeholder="Buscar por nome ou documento..."
           value={searchText}
           onChangeText={setSearchText}
-          placeholderTextColor="#999"
+          placeholderTextColor={theme.textSecondary}
         />
       </View>
 
       {/* Filter Buttons */}
-      <View style={styles.filterContainer}>
+      <View style={[styles.filterContainer, { backgroundColor: theme.card }]}>
         {([
           { key: 'all' as FilterType, label: 'Todos', count: customers.length },
           { key: 'active' as FilterType, label: 'Ativos', count: customers.filter(c => c.active).length },
@@ -231,13 +234,15 @@ export default function ClientesScreen() {
             key={filter.key}
             style={[
               styles.filterButton,
-              filterActive === filter.key && styles.activeFilterButton
+              { backgroundColor: theme.background },
+              filterActive === filter.key && { backgroundColor: theme.primary }
             ]}
             onPress={() => setFilterActive(filter.key)}
           >
             <Text style={[
               styles.filterButtonText,
-              filterActive === filter.key && styles.activeFilterButtonText
+              { color: theme.textSecondary },
+              filterActive === filter.key && { color: theme.buttonText }
             ]}>
               {filter.label} ({filter.count})
             </Text>
@@ -258,16 +263,16 @@ export default function ClientesScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={handleRefresh}
-            colors={['#2196F3']}
-            tintColor="#2196F3"
+            colors={[theme.primary]}
+            tintColor={theme.primary}
           />
         }
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>
+            <Text style={[styles.emptyText, { color: theme.textSecondary }]}>
               {loading ? 'Carregando...' : 'Nenhum cliente encontrado'}
             </Text>
-            <Text style={styles.emptySubtext}>
+            <Text style={[styles.emptySubtext, { color: theme.textSecondary }]}>
               {loading ? 'Por favor, aguarde' : 'Tente ajustar os filtros ou termo de busca'}
             </Text>
           </View>
@@ -276,10 +281,10 @@ export default function ClientesScreen() {
 
       {/* Add Button */}
       <TouchableOpacity
-        style={styles.addButton}
+        style={[styles.addButton, { backgroundColor: theme.primary }]}
         onPress={() => setShowCreateModal(true)}
       >
-        <Text style={styles.addButtonText}>+</Text>
+        <Text style={[styles.addButtonText, { color: theme.buttonText }]}>+</Text>
       </TouchableOpacity>
 
       {/* Modais e Telas */}
@@ -331,11 +336,9 @@ export default function ClientesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
   },
   searchContainer: {
     padding: 16,
-    backgroundColor: 'white',
     elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -343,45 +346,35 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   searchInput: {
-    backgroundColor: '#f8f8f8',
     borderRadius: 12,
     padding: 12,
     fontSize: 16,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
   },
   filterContainer: {
     flexDirection: 'row',
     padding: 16,
     paddingTop: 8,
-    backgroundColor: 'white',
     gap: 8,
   },
   filterButton: {
     flex: 1,
-    backgroundColor: '#f0f0f0',
     paddingVertical: 10,
     paddingHorizontal: 12,
     borderRadius: 8,
     alignItems: 'center',
   },
-  activeFilterButton: {
-    backgroundColor: '#2196F3',
-  },
+  activeFilterButton: {},
   filterButtonText: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#666',
   },
-  activeFilterButtonText: {
-    color: 'white',
-  },
+  activeFilterButtonText: {},
   listContainer: {
     padding: 16,
     paddingTop: 8,
   },
   customerCard: {
-    backgroundColor: 'white',
     borderRadius: 12,
     marginBottom: 12,
     elevation: 3,
@@ -413,7 +406,6 @@ const styles = StyleSheet.create({
   customerName: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
     marginBottom: 8,
   },
   typeContainer: {
@@ -453,13 +445,11 @@ const styles = StyleSheet.create({
   },
   documentText: {
     fontSize: 14,
-    color: '#666',
     fontFamily: 'monospace',
     marginBottom: 6,
   },
   lastPurchaseText: {
     fontSize: 14,
-    color: '#666',
     marginBottom: 12,
   },
   contactsContainer: {
@@ -467,7 +457,6 @@ const styles = StyleSheet.create({
   },
   contactText: {
     fontSize: 14,
-    color: '#555',
   },
   emptyContainer: {
     flex: 1,
@@ -478,19 +467,16 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 18,
     fontWeight: '500',
-    color: '#666',
     marginBottom: 8,
   },
   emptySubtext: {
     fontSize: 14,
-    color: '#999',
     textAlign: 'center',
   },
   addButton: {
     position: 'absolute',
     bottom: 24,
     right: 24,
-    backgroundColor: '#2196F3',
     width: 56,
     height: 56,
     borderRadius: 28,
@@ -505,7 +491,6 @@ const styles = StyleSheet.create({
   addButtonText: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: 'white',
   },
   // Avatar do cliente
   avatarContainer: {
