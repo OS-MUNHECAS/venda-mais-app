@@ -1,13 +1,14 @@
 import React from 'react';
 import {
+    Alert,
     Modal,
-    View,
+    StyleSheet,
     Text,
     TouchableOpacity,
-    Alert,
-    StyleSheet,
+    View,
 } from 'react-native';
 import { Customer } from '../app/(tabs)/types/customer';
+import { useTheme } from '../contexts/ThemeContext';
 import { CustomerService } from '../services/customer.service';
 
 interface Props {
@@ -18,6 +19,7 @@ interface Props {
 }
 
 export default function DeleteCustomerModal({ visible, customer, onClose, onSuccess }: Props) {
+    const { theme } = useTheme();
     const [loading, setLoading] = React.useState(false);
 
     const handleSoftDelete = async () => {
@@ -82,38 +84,38 @@ export default function DeleteCustomerModal({ visible, customer, onClose, onSucc
     return (
         <Modal visible={visible} transparent animationType="fade">
             <View style={styles.overlay}>
-                <View style={styles.container}>
-                    <Text style={styles.title}>Excluir Cliente</Text>
+                <View style={[styles.container, { backgroundColor: theme.card }]}>
+                    <Text style={[styles.title, { color: theme.text }]}>Excluir Cliente</Text>
 
-                    <View style={styles.customerInfo}>
-                        <Text style={styles.customerName}>{customer.person.name}</Text>
-                        <Text style={styles.customerDocument}>{customer.person.cpf_cnpj}</Text>
+                    <View style={[styles.customerInfo, { backgroundColor: theme.background }]}>
+                        <Text style={[styles.customerName, { color: theme.text }]}>{customer.person.name}</Text>
+                        <Text style={[styles.customerDocument, { color: theme.textSecondary }]}>{customer.person.cpf_cnpj}</Text>
                     </View>
 
-                    <Text style={styles.description}>
+                    <Text style={[styles.description, { color: theme.textSecondary }]}>
                         Escolha como você deseja proceder com este cliente:
                     </Text>
 
                     <View style={styles.optionsContainer}>
                         <TouchableOpacity
-                            style={[styles.optionButton, styles.softDeleteButton]}
+                            style={[styles.optionButton, styles.softDeleteButton, { borderColor: theme.warning }]}
                             onPress={handleSoftDelete}
                             disabled={loading}
                         >
-                            <Text style={styles.optionTitle}>Desativar Cliente</Text>
-                            <Text style={styles.optionDescription}>
+                            <Text style={[styles.optionTitle, { color: theme.text }]}>Desativar Cliente</Text>
+                            <Text style={[styles.optionDescription, { color: theme.textSecondary }]}>
                                 O cliente ficará inativo, mas os dados serão mantidos.
                                 Pode ser reativado posteriormente.
                             </Text>
                         </TouchableOpacity>
 
                         <TouchableOpacity
-                            style={[styles.optionButton, styles.hardDeleteButton]}
+                            style={[styles.optionButton, styles.hardDeleteButton, { borderColor: theme.error }]}
                             onPress={handleHardDelete}
                             disabled={loading}
                         >
-                            <Text style={[styles.optionTitle, styles.destructiveText]}>Excluir Permanentemente</Text>
-                            <Text style={[styles.optionDescription, styles.destructiveText]}>
+                            <Text style={[styles.optionTitle, styles.destructiveText, { color: theme.error }]}>Excluir Permanentemente</Text>
+                            <Text style={[styles.optionDescription, styles.destructiveText, { color: theme.error }]}>
                                 Remove todos os dados do cliente permanentemente.
                                 Esta ação não pode ser desfeita.
                             </Text>
@@ -122,11 +124,11 @@ export default function DeleteCustomerModal({ visible, customer, onClose, onSucc
 
                     <View style={styles.footer}>
                         <TouchableOpacity
-                            style={[styles.button, styles.cancelButton]}
+                            style={[styles.button, styles.cancelButton, { backgroundColor: theme.background, borderColor: theme.border }]}
                             onPress={onClose}
                             disabled={loading}
                         >
-                            <Text style={styles.cancelButtonText}>Cancelar</Text>
+                            <Text style={[styles.cancelButtonText, { color: theme.textSecondary }]}>Cancelar</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -144,7 +146,6 @@ const styles = StyleSheet.create({
         padding: 20,
     },
     container: {
-        backgroundColor: 'white',
         borderRadius: 12,
         padding: 20,
         width: '100%',
@@ -153,31 +154,26 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 20,
         fontWeight: 'bold',
-        color: '#333',
         textAlign: 'center',
         marginBottom: 16,
     },
     customerInfo: {
         alignItems: 'center',
         padding: 16,
-        backgroundColor: '#f8f8f8',
         borderRadius: 8,
         marginBottom: 16,
     },
     customerName: {
         fontSize: 18,
         fontWeight: 'bold',
-        color: '#333',
         marginBottom: 4,
     },
     customerDocument: {
         fontSize: 14,
-        color: '#666',
         fontFamily: 'monospace',
     },
     description: {
         fontSize: 14,
-        color: '#666',
         textAlign: 'center',
         marginBottom: 20,
         lineHeight: 20,
@@ -202,17 +198,13 @@ const styles = StyleSheet.create({
     optionTitle: {
         fontSize: 16,
         fontWeight: 'bold',
-        color: '#333',
         marginBottom: 4,
     },
     optionDescription: {
         fontSize: 12,
-        color: '#666',
         lineHeight: 16,
     },
-    destructiveText: {
-        color: '#f44336',
-    },
+    destructiveText: {},
     footer: {
         alignItems: 'center',
     },
@@ -224,12 +216,9 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     cancelButton: {
-        backgroundColor: '#f5f5f5',
         borderWidth: 1,
-        borderColor: '#ddd',
     },
     cancelButtonText: {
-        color: '#666',
         fontWeight: '500',
     },
 });

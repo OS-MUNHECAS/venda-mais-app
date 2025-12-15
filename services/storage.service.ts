@@ -1,9 +1,11 @@
 
 import { Customer } from '../app/(tabs)/types/customer';
-import { mockCustomers } from '../database/mocks';
+import { Product } from '../app/(tabs)/types/product';
+import { mockCustomers, mockProducts } from '../database/mocks';
 
 export class StorageService {
     private static readonly CUSTOMERS_KEY = '@venda_mais:customers';
+    private static readonly PRODUCTS_KEY = '@venda_mais:products';
     private static memoryStorage: { [key: string]: string } = {};
 
     static async loadCustomers(): Promise<Customer[]> {
@@ -75,6 +77,79 @@ export class StorageService {
             return customersData !== null;
         } catch (error) {
             console.error('StorageService.hasCustomersData() - Erro ao verificar:', error);
+            return false;
+        }
+    }
+
+    static async loadProducts(): Promise<Product[]> {
+        try {
+            let productsData: string | null = null;
+
+            if (typeof window !== 'undefined' && window.localStorage) {
+                productsData = window.localStorage.getItem(this.PRODUCTS_KEY);
+            } else {
+                productsData = this.memoryStorage[this.PRODUCTS_KEY] || null;
+            }
+
+            if (productsData) {
+                const products = JSON.parse(productsData);
+                console.log('StorageService.loadProducts() - Carregados do storage:', products.length);
+                return products;
+            } else {
+                console.log('StorageService.loadProducts() - Primeiro acesso, usando dados mock');
+                await this.saveProducts(mockProducts);
+                return [...mockProducts];
+            }
+        } catch (error) {
+            console.error('StorageService.loadProducts() - Erro ao carregar:', error);
+            return [...mockProducts];
+        }
+    }
+
+    static async saveProducts(products: Product[]): Promise<void> {
+        try {
+            const productsData = JSON.stringify(products);
+
+            if (typeof window !== 'undefined' && window.localStorage) {
+                window.localStorage.setItem(this.PRODUCTS_KEY, productsData);
+            } else {
+                this.memoryStorage[this.PRODUCTS_KEY] = productsData;
+            }
+
+            console.log('StorageService.saveProducts() - Salvos no storage:', products.length);
+        } catch (error) {
+            console.error('StorageService.saveProducts() - Erro ao salvar:', error);
+            throw new Error('Erro ao salvar dados localmente');
+        }
+    }
+
+    static async clearProducts(): Promise<void> {
+        try {
+            if (typeof window !== 'undefined' && window.localStorage) {
+                window.localStorage.removeItem(this.PRODUCTS_KEY);
+            } else {
+                delete this.memoryStorage[this.PRODUCTS_KEY];
+            }
+            console.log('StorageService.clearProducts() - Dados limpos do storage');
+        } catch (error) {
+            console.error('StorageService.clearProducts() - Erro ao limpar:', error);
+            throw new Error('Erro ao limpar dados localmente');
+        }
+    }
+
+    static async hasProductsData(): Promise<boolean> {
+        try {
+            let productsData: string | null = null;
+
+            if (typeof window !== 'undefined' && window.localStorage) {
+                productsData = window.localStorage.getItem(this.PRODUCTS_KEY);
+            } else {
+                productsData = this.memoryStorage[this.PRODUCTS_KEY] || null;
+            }
+
+            return productsData !== null;
+        } catch (error) {
+            console.error('StorageService.hasProductsData() - Erro ao verificar:', error);
             return false;
         }
     }
